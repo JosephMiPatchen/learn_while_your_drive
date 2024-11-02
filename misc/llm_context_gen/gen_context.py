@@ -2,8 +2,9 @@ import os
 import argparse
 
 def combine_files(input_dir, output_file):
-    # Hardcoded set of directories to ignore
-    ignore_dirs = {'.git', '.redwood', '.vscode', "dist"}
+    # Hardcoded sets of directories and filenames to ignore
+    ignore_dirs = {'.git', '.redwood', '.vscode', 'dist', 'node_modules', '.yarn'}
+    ignore_files = {'README.md', 'LICENSE', 'dev.db','favicon.png'}
 
     with open(output_file, 'w') as outfile:
         for root, dirs, files in os.walk(input_dir):
@@ -12,8 +13,8 @@ def combine_files(input_dir, output_file):
 
             for file in files:
                 file_path = os.path.join(root, file)
-                # Skip hidden files
-                if not file.startswith('.') and os.path.isfile(file_path):
+                # Skip hidden files and files in the ignore list
+                if not file.startswith('.') and file not in ignore_files and os.path.isfile(file_path):
                     try:
                         with open(file_path, 'r') as infile:
                             # Write filename as a header in the output file
