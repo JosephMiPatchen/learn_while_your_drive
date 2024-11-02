@@ -16,13 +16,11 @@ export const schema = gql`
 
   input CreateGoalInput {
     description: String!
-    modifiedAt: DateTime!
     userId: String!
   }
 
   input UpdateGoalInput {
     description: String
-    modifiedAt: DateTime
     userId: String
   }
 
