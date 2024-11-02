@@ -9,7 +9,7 @@ const HomePage = () => {
     <>
       <Metadata title="Home" description="Home page" />
 
-      <GoalCell id="3190d9e7-33f8-4888-a81a-0a26dbb4829b" />
+      <GoalCell id="goal1" />
     </>
   )
 }

@@ -16020,6 +16020,7 @@ __metadata:
   dependencies:
     "@redwoodjs/core": "npm:8.4.0"
     "@redwoodjs/project-config": "npm:8.4.0"
+    antd: "npm:^5.21.6"
   languageName: unknown
   linkType: soft
 

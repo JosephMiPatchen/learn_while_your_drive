@@ -1,3 +1,4 @@
+
 // In this file, all Page components from 'src/pages` are auto-imported. Nested
 // directories are supported, and should be uppercase. Each subdirectory will be
 // prepended onto the component name.
@@ -33,6 +34,7 @@ const Routes = () => {
         <Route path="/users/{id}" page={UserUserPage} name="user" />
         <Route path="/users" page={UserUsersPage} name="users" />
       </Set>
+      <Route path="/rec-engine" page={RecEnginePage} name="recEngine" />
       <Route path="/goal" page={GoalPage} name="goal" />
       <Route notfound page={NotFoundPage} />
     </Router>
@@ -40,3 +42,4 @@ const Routes = () => {
 }
 
 export default Routes
+
