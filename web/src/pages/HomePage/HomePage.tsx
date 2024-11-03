@@ -2,8 +2,49 @@ import React from 'react'
 
 import { SettingOutlined, UserOutlined } from '@ant-design/icons'
 import { Button, Card, Form, Input, Typography } from 'antd'
+import {
+  EditUserById,
+  FindUserById,
+  FindUserByIdVariables,
+  UpdateUserMutationVariables,
+} from 'types/graphql'
 
-import { Metadata } from '@redwoodjs/web'
+import { navigate, routes } from '@redwoodjs/router'
+import {
+  Metadata,
+  TypedDocumentNode,
+  useMutation,
+  useQuery,
+} from '@redwoodjs/web'
+import { toast } from '@redwoodjs/web/toast'
+
+const UPDATE_USER_MUTATION: TypedDocumentNode<
+  EditUserById,
+  UpdateUserMutationVariables
+> = gql`
+  mutation UpdateUserMutation($id: String!, $input: UpdateUserInput!) {
+    updateUser(id: $id, input: $input) {
+      id
+      email
+      name
+      averageDriveDurationMinutes
+      goal
+    }
+  }
+`
+
+const FIND_USER_QUERY: TypedDocumentNode<FindUserById, FindUserByIdVariables> =
+  gql`
+    query FindUserById($id: String!) {
+      user: user(id: $id) {
+        id
+        email
+        name
+        averageDriveDurationMinutes
+        goal
+      }
+    }
+  `
 
 const accentPink = '#ff4a91'
 
@@ -47,19 +88,36 @@ type Props = {}
 
 // Main Goal Component
 const HomePage = (props: Props) => {
-  // const [updateGoal] = useMutation(UPDATE_GOAL_MUTATION, {
-  //   onCompleted: () => {
-  //     toast.success('Goal updated')
-  //   },
-  //   onError: (error) => {
-  //     toast.error(error.message)
-  //   },
-  // })
+  const { data, loading, error } = useQuery(FIND_USER_QUERY, {
+    variables: { id: 'user1' },
+  })
+
+  const [updateUser] = useMutation(UPDATE_USER_MUTATION, {
+    onCompleted: () => {
+      toast.success('User updated')
+      navigate(routes.users())
+    },
+    onError: (error) => {
+      toast.error(error.message)
+    },
+  })
 
   const handleSubmit = (values) => {
-    // updateGoal({
-    //   variables: { id: goal.id, input: { description: values.description } },
-    // })
+    updateUser({ variables: { id: 'user1', input: { goal: values.goal } } })
+
+    navigate(routes.recEngine())
+  }
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
+
+  if (error) {
+    return <div className="rw-cell-error">{error.message}</div>
+  }
+
+  if (!data?.user) {
+    return <div>User not found</div>
   }
 
   return (
@@ -101,11 +159,11 @@ const HomePage = (props: Props) => {
         >
           <Form
             onFinish={handleSubmit}
-            initialValues={{ description: 'example description' }}
+            initialValues={{ goal: data.user.goal }}
             layout="vertical"
           >
             <Form.Item
-              name="description"
+              name="goal"
               label="Learning Goal"
               rules={[
                 { required: true, message: 'Please enter your learning goal' },
