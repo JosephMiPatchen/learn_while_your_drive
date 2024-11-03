@@ -12,35 +12,21 @@ import { db } from 'api/src/lib/db'
 export default async () => {
   try {
     // Seed Users
-    const users = await db.user.createMany({
+    await db.user.createMany({
       data: [
         {
           id: 'user1',
           email: 'alice@example.com',
           name: 'Alice',
+          goal: 'Complete Redwood tutorial',
           averageDriveDurationMinutes: 15,
         },
         {
           id: 'user2',
           email: 'bob@example.com',
           name: 'Bob',
+          goal: 'Start a blog',
           averageDriveDurationMinutes: 25,
-        },
-      ],
-    })
-
-    // Seed Goals
-    const goals = await db.goal.createMany({
-      data: [
-        {
-          id: 'goal1',
-          description: 'Complete Redwood tutorial',
-          userId: 'user1',
-        },
-        {
-          id: 'goal2',
-          description: 'Start a blog',
-          userId: 'user2',
         },
       ],
     })
@@ -53,19 +39,19 @@ export default async () => {
           title: 'Introduction to Redwood',
           description: 'Learn the basics of Redwood',
           url: 'https://redwoodjs.com/tutorial',
-          goalId: 'goal1',
+          userId: 'user1',
         },
         {
           id: 'content2',
           title: 'Setting up Prisma',
           description: 'Learn how to set up Prisma in Redwood',
-          goalId: 'goal1',
+          userId: 'user1',
         },
         {
           id: 'content3',
           title: 'How to start a blog',
           description: 'Guide to starting a blog',
-          goalId: 'goal2',
+          userId: 'user2',
         },
       ],
     })
