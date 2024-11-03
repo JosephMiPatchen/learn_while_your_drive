@@ -40,7 +40,6 @@ const Routes = () => {
         <Route path="/users" page={UserUsersPage} name="users" />
       </Set>
       <Route path="/rec-engine" page={RecEnginePage} name="recEngine" />
-      <Route path="/goal" page={GoalPage} name="goal" />
       <Route notfound page={NotFoundPage} />
     </Router>
   )
