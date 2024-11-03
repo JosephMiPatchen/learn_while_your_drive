@@ -4,7 +4,8 @@ export const schema = gql`
     email: String!
     name: String
     averageDriveDurationMinutes: Int!
-    Goal: [Goal]!
+    goal: String
+    ContentItem: [ContentItem]!
   }
 
   type Query {
@@ -16,12 +17,14 @@ export const schema = gql`
     email: String!
     name: String
     averageDriveDurationMinutes: Int!
+    goal: String
   }
 
   input UpdateUserInput {
     email: String
     name: String
     averageDriveDurationMinutes: Int
+    goal: String
   }
 
   type Mutation {

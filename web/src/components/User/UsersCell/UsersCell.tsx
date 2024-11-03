@@ -16,6 +16,7 @@ export const QUERY: TypedDocumentNode<FindUsers, FindUsersVariables> = gql`
       email
       name
       averageDriveDurationMinutes
+      goal
     }
   }
 `

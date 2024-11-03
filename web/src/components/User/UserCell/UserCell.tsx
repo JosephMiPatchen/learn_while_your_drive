@@ -16,6 +16,7 @@ export const QUERY: TypedDocumentNode<FindUserById, FindUserByIdVariables> =
         email
         name
         averageDriveDurationMinutes
+        goal
       }
     }
   `

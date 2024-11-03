@@ -22,6 +22,7 @@ export const QUERY: TypedDocumentNode<EditUserById> = gql`
       email
       name
       averageDriveDurationMinutes
+      goal
     }
   }
 `
@@ -36,6 +37,7 @@ const UPDATE_USER_MUTATION: TypedDocumentNode<
       email
       name
       averageDriveDurationMinutes
+      goal
     }
   }
 `

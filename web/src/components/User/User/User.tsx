@@ -69,6 +69,10 @@ const User = ({ user }: Props) => {
               <th>Average drive duration minutes</th>
               <td>{user.averageDriveDurationMinutes}</td>
             </tr>
+            <tr>
+              <th>Goal</th>
+              <td>{user.goal}</td>
+            </tr>
           </tbody>
         </table>
       </div>
