@@ -25,7 +25,7 @@ export const QUERY: TypedDocumentNode<EditContentItemById> = gql`
       content
       createdAt
       modifiedAt
-      goalId
+      userId
       nextContentItemId
     }
   }
@@ -47,7 +47,7 @@ const UPDATE_CONTENT_ITEM_MUTATION: TypedDocumentNode<
       content
       createdAt
       modifiedAt
-      goalId
+      userId
       nextContentItemId
     }
   }

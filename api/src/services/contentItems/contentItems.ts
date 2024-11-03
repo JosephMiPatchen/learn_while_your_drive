@@ -43,8 +43,8 @@ export const deleteContentItem: MutationResolvers['deleteContentItem'] = ({
 }
 
 export const ContentItem: ContentItemRelationResolvers = {
-  goal: (_obj, { root }) => {
-    return db.contentItem.findUnique({ where: { id: root?.id } }).goal()
+  user: (_obj, { root }) => {
+    return db.contentItem.findUnique({ where: { id: root?.id } }).user()
   },
   nextContentItem: (_obj, { root }) => {
     return db.contentItem

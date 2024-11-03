@@ -105,22 +105,22 @@ const ContentItemForm = (props: ContentItemFormProps) => {
         <FieldError name="content" className="rw-field-error" />
 
         <Label
-          name="goalId"
+          name="userId"
           className="rw-label"
           errorClassName="rw-label rw-label-error"
         >
-          Goal id
+          User id
         </Label>
 
         <TextField
-          name="goalId"
-          defaultValue={props.contentItem?.goalId}
+          name="userId"
+          defaultValue={props.contentItem?.userId}
           className="rw-input"
           errorClassName="rw-input rw-input-error"
           validation={{ required: true }}
         />
 
-        <FieldError name="goalId" className="rw-field-error" />
+        <FieldError name="userId" className="rw-field-error" />
 
         <Label
           name="nextContentItemId"

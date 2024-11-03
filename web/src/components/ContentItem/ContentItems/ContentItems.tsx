@@ -56,7 +56,7 @@ const ContentItemsList = ({ contentItems }: FindContentItems) => {
             <th>Content</th>
             <th>Created at</th>
             <th>Modified at</th>
-            <th>Goal id</th>
+            <th>User id</th>
             <th>Next content item id</th>
             <th>&nbsp;</th>
           </tr>
@@ -71,7 +71,7 @@ const ContentItemsList = ({ contentItems }: FindContentItems) => {
               <td>{truncate(contentItem.content)}</td>
               <td>{timeTag(contentItem.createdAt)}</td>
               <td>{timeTag(contentItem.modifiedAt)}</td>
-              <td>{truncate(contentItem.goalId)}</td>
+              <td>{truncate(contentItem.userId)}</td>
               <td>{truncate(contentItem.nextContentItemId)}</td>
               <td>
                 <nav className="rw-table-actions">

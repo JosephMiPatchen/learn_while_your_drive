@@ -24,7 +24,7 @@ export const QUERY: TypedDocumentNode<
       content
       createdAt
       modifiedAt
-      goalId
+      userId
       nextContentItemId
     }
   }

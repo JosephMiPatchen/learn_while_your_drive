@@ -7,8 +7,8 @@ export const schema = gql`
     content: String
     createdAt: DateTime!
     modifiedAt: DateTime!
-    goalId: String!
-    goal: Goal!
+    userId: String!
+    user: User!
     nextContentItemId: String
     nextContentItem: ContentItem
     ContentItem: ContentItem
@@ -25,7 +25,7 @@ export const schema = gql`
     url: String
     content: String
     modifiedAt: DateTime!
-    goalId: String!
+    userId: String!
     nextContentItemId: String
   }
 
@@ -35,7 +35,7 @@ export const schema = gql`
     url: String
     content: String
     modifiedAt: DateTime
-    goalId: String
+    userId: String
     nextContentItemId: String
   }
 

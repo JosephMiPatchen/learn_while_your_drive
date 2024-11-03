@@ -82,8 +82,8 @@ const ContentItem = ({ contentItem }: Props) => {
               <td>{timeTag(contentItem.modifiedAt)}</td>
             </tr>
             <tr>
-              <th>Goal id</th>
-              <td>{contentItem.goalId}</td>
+              <th>User id</th>
+              <td>{contentItem.userId}</td>
             </tr>
             <tr>
               <th>Next content item id</th>

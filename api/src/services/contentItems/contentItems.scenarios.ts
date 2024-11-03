@@ -7,17 +7,11 @@ export const standard = defineScenario<Prisma.ContentItemCreateArgs>({
       data: {
         title: 'String',
         description: 'String',
-        modifiedAt: '2024-11-02T18:43:57.476Z',
-        goal: {
+        modifiedAt: '2024-11-03T00:49:33.512Z',
+        user: {
           create: {
-            description: 'String',
-            modifiedAt: '2024-11-02T18:43:57.476Z',
-            user: {
-              create: {
-                email: 'String6577564',
-                averageDriveDurationMinutes: 115314,
-              },
-            },
+            email: 'String7054341',
+            averageDriveDurationMinutes: 1887635,
           },
         },
       },
@@ -26,17 +20,11 @@ export const standard = defineScenario<Prisma.ContentItemCreateArgs>({
       data: {
         title: 'String',
         description: 'String',
-        modifiedAt: '2024-11-02T18:43:57.476Z',
-        goal: {
+        modifiedAt: '2024-11-03T00:49:33.512Z',
+        user: {
           create: {
-            description: 'String',
-            modifiedAt: '2024-11-02T18:43:57.477Z',
-            user: {
-              create: {
-                email: 'String210402',
-                averageDriveDurationMinutes: 9166948,
-              },
-            },
+            email: 'String8534565',
+            averageDriveDurationMinutes: 4522365,
           },
         },
       },

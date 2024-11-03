@@ -36,15 +36,15 @@ describe('contentItems', () => {
       input: {
         title: 'String',
         description: 'String',
-        modifiedAt: '2024-11-02T18:43:57.427Z',
-        goalId: scenario.contentItem.two.goalId,
+        modifiedAt: '2024-11-03T00:49:33.488Z',
+        userId: scenario.contentItem.two.userId,
       },
     })
 
     expect(result.title).toEqual('String')
     expect(result.description).toEqual('String')
-    expect(result.modifiedAt).toEqual(new Date('2024-11-02T18:43:57.427Z'))
-    expect(result.goalId).toEqual(scenario.contentItem.two.goalId)
+    expect(result.modifiedAt).toEqual(new Date('2024-11-03T00:49:33.488Z'))
+    expect(result.userId).toEqual(scenario.contentItem.two.userId)
   })
 
   scenario('updates a contentItem', async (scenario: StandardScenario) => {
