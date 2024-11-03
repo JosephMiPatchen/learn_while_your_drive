@@ -19,7 +19,7 @@ model User {
   email                       String  @unique
   name                        String?
   averageDriveDurationMinutes Int
-  goal String
+  goal                        String?
 
   ContentItem ContentItem[]
 }
@@ -36,7 +36,7 @@ model ContentItem {
   userId String
   user   User   @relation(fields: [userId], references: [id])
 
-  nextContentItemId String? @unique
+  nextContentItemId String?      @unique
   nextContentItem   ContentItem? @relation("NextContentItem", fields: [nextContentItemId], references: [id])
-  ContentItem ContentItem? @relation("NextContentItem")
+  ContentItem       ContentItem? @relation("NextContentItem")
 }
