@@ -95,7 +95,6 @@ const HomePage = (props: Props) => {
   const [updateUser] = useMutation(UPDATE_USER_MUTATION, {
     onCompleted: () => {
       toast.success('User updated')
-      navigate(routes.users())
     },
     onError: (error) => {
       toast.error(error.message)
