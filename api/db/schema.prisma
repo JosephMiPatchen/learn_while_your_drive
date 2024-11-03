@@ -43,8 +43,7 @@ model LearningTree {
   user        User             @relation(fields: [userId], references: [id])
   userId      String           @unique  // Enforces one-to-one relationship with User
 
-  rootNode    LearningTreeNode @relation(fields: [rootNodeId], references: [id])
-  rootNodeId  String           @unique  // Each tree has only one root node
+  rootNodeId  String?
 }
 
 model LearningTreeNode {
@@ -57,5 +56,5 @@ model LearningTreeNode {
   parent      LearningTreeNode? @relation("ChildNodes", fields: [parentId], references: [id])
   children    LearningTreeNode[] @relation("ChildNodes")
 
-  learningTree LearningTree?     @relation // Remove `fields` and `references` from this side
+
 }

@@ -25,6 +25,12 @@
     "@storybook/react-dom-shim@npm:7.6.17": "https://verdaccio.tobbe.dev/@storybook/react-dom-shim/-/react-dom-shim-8.0.8.tgz"
   },
   "dependencies": {
-    "antd": "^5.21.6"
+    "@aws-sdk/client-bedrock": "^3.682.0",
+    "@aws-sdk/client-bedrock-runtime": "^3.682.0",
+    "@react-spring/web": "^9.7.5",
+    "antd": "^5.21.6",
+    "aws-sdk": "^2.1691.0",
+    "openai": "^4.70.2",
+    "react-transition-group": "^4.4.5"
   }
 }

@@ -7,8 +7,8 @@ export const standard = defineScenario<Prisma.LearningTreeCreateArgs>({
       data: {
         user: {
           create: {
-            email: 'String7683297',
-            averageDriveDurationMinutes: 2291473,
+            email: 'String8867036',
+            averageDriveDurationMinutes: 5398778,
           },
         },
         rootNode: { create: { topic: 'String' } },
@@ -18,8 +18,8 @@ export const standard = defineScenario<Prisma.LearningTreeCreateArgs>({
       data: {
         user: {
           create: {
-            email: 'String3920193',
-            averageDriveDurationMinutes: 9561260,
+            email: 'String6590165',
+            averageDriveDurationMinutes: 5492990,
           },
         },
         rootNode: { create: { topic: 'String' } },

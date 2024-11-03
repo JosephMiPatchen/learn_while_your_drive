@@ -15,7 +15,6 @@ export const schema = gql`
 
   input CreateLearningTreeInput {
     userId: String!
-    rootNodeId: String!
   }
 
   input UpdateLearningTreeInput {
