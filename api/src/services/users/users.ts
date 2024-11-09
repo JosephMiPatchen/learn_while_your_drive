@@ -1,11 +1,19 @@
+import fs from 'fs'
+import path from 'path'
+
+import OpenAI from 'openai'
 import type {
-  QueryResolvers,
   MutationResolvers,
+  QueryResolvers,
   UserRelationResolvers,
 } from 'types/graphql'
-import { queryOpenAi } from 'src/lib/openAiClient'
 
 import { db } from 'src/lib/db'
+import { queryOpenAi } from 'src/lib/openAiClient'
+
+const openAiClient = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY, // This is the default and can be omitted
+})
 
 export const users: QueryResolvers['users'] = () => {
   return db.user.findMany()
@@ -94,4 +102,26 @@ export const User: UserRelationResolvers = {
   ContentItem: (_obj, { root }) => {
     return db.user.findUnique({ where: { id: root?.id } }).ContentItem()
   },
+}
+
+// Sends `text` to OpenAI's text-to-speech API and writes the audio file to the filesystem. Returns
+// the path to the audio file.
+const writeAudioFile = async (text: string): Promise<string> => {
+  const response = await openAiClient.audio.speech.create({
+    model: 'tts-1-hd',
+    voice: 'echo',
+    input:
+      text ||
+      `
+      I drink brake fluid
+      They say I'm addicted, but
+      I can always stop
+      `,
+  })
+
+  const buffer = Buffer.from(await response.arrayBuffer())
+  const speechFilePath = path.resolve(`./web/public/${Date.now()}.mp3`)
+  await fs.promises.writeFile(speechFilePath, buffer)
+
+  return speechFilePath
 }
