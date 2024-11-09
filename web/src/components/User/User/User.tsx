@@ -73,6 +73,10 @@ const User = ({ user }: Props) => {
               <th>Goal</th>
               <td>{user.goal}</td>
             </tr>
+            <tr>
+              <th>Learning tree</th>
+              <td>{user.learningTree}</td>
+            </tr>
           </tbody>
         </table>
       </div>

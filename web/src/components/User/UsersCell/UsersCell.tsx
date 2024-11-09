@@ -17,6 +17,7 @@ export const QUERY: TypedDocumentNode<FindUsers, FindUsersVariables> = gql`
       name
       averageDriveDurationMinutes
       goal
+      learningTree
     }
   }
 `

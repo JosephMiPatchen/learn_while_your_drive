@@ -16,7 +16,7 @@ model User {
   goal                        String?
 
   ContentItem ContentItem[]
-  learningTree LearningTree?   // A user can have only one LearningTree
+  learningTree String?
 }
 
 model ContentItem {
@@ -34,27 +34,4 @@ model ContentItem {
   nextContentItemId String?      @unique
   nextContentItem   ContentItem? @relation("NextContentItem", fields: [nextContentItemId], references: [id])
   ContentItem       ContentItem? @relation("NextContentItem")
-}
-
-model LearningTree {
-  id          String           @id @default(uuid())
-  createdAt   DateTime         @default(now())
-
-  user        User             @relation(fields: [userId], references: [id])
-  userId      String           @unique  // Enforces one-to-one relationship with User
-
-  rootNodeId  String?
-}
-
-model LearningTreeNode {
-  id          String           @id @default(uuid())
-  topic       String
-  createdAt   DateTime         @default(now())
-  isRoot      Boolean          @default(false)
-
-  parentId    String?           // For linking to the parent node in the tree structure
-  parent      LearningTreeNode? @relation("ChildNodes", fields: [parentId], references: [id])
-  children    LearningTreeNode[] @relation("ChildNodes")
-
-
 }

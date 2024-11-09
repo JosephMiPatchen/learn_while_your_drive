@@ -17,6 +17,7 @@ export const QUERY: TypedDocumentNode<FindUserById, FindUserByIdVariables> =
         name
         averageDriveDurationMinutes
         goal
+        learningTree
       }
     }
   `

@@ -15,15 +15,6 @@ const UPDATE_USER_GOAL_MUTATION = gql`
   }
 `
 
-const CREATE_LEARNING_TREE_MUTATION = gql`
-  mutation CreateLearningTree($input: CreateLearningTreeInput!) {
-    createLearningTree(input: $input) {
-      id
-      createdAt
-    }
-  }
-`
-
 const TitleBar: React.FC = () => (
   <div style={{
     position: 'fixed', top: 0, left: 0, right: 0, height: '60px',
@@ -45,17 +36,6 @@ const HomePage: React.FC = () => {
   const [loading, setLoading] = useState(false)
 
   const [updateUserGoal] = useMutation(UPDATE_USER_GOAL_MUTATION, {
-    onError: (error) => {
-      notification.error({
-        message: 'Error',
-        description: error.message || 'Failed to update user goal.',
-        placement: 'top',
-      })
-      setLoading(false)
-    },
-  })
-
-  const [createLearningTree] = useMutation(CREATE_LEARNING_TREE_MUTATION, {
     onCompleted: () => {
       notification.success({
         message: 'Success!',
@@ -68,11 +48,11 @@ const HomePage: React.FC = () => {
     onError: (error) => {
       notification.error({
         message: 'Error',
-        description: error.message || 'Failed to create Learning Tree. Please try again.',
+        description: error.message || 'Failed to update user goal.',
         placement: 'top',
       })
       setLoading(false)
-    },
+    }
   })
 
   const handleSubmit = async (values) => {
@@ -80,7 +60,7 @@ const HomePage: React.FC = () => {
 
     try {
       await updateUserGoal({ variables: { id: 'user1', goal: values.description } })
-      await createLearningTree({ variables: { input: { userId: 'user1' } } })
+      //await createLearningTree({ variables: { input: { userId: 'user1' } } })
     } catch (error) {
       setLoading(false)
     }

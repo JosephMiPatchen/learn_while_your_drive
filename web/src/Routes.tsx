@@ -14,18 +14,6 @@ import ScaffoldLayout from 'src/layouts/ScaffoldLayout'
 const Routes = () => {
   return (
     <Router>
-      <Set wrap={ScaffoldLayout} title="LearningTrees" titleTo="learningTrees" buttonLabel="New LearningTree" buttonTo="newLearningTree">
-        <Route path="/learning-trees/new" page={LearningTreeNewLearningTreePage} name="newLearningTree" />
-        <Route path="/learning-trees/{id}/edit" page={LearningTreeEditLearningTreePage} name="editLearningTree" />
-        <Route path="/learning-trees/{id}" page={LearningTreeLearningTreePage} name="learningTree" />
-        <Route path="/learning-trees" page={LearningTreeLearningTreesPage} name="learningTrees" />
-      </Set>
-      <Set wrap={ScaffoldLayout} title="LearningTreeNodes" titleTo="learningTreeNodes" buttonLabel="New LearningTreeNode" buttonTo="newLearningTreeNode">
-        <Route path="/learning-tree-nodes/new" page={LearningTreeNodeNewLearningTreeNodePage} name="newLearningTreeNode" />
-        <Route path="/learning-tree-nodes/{id}/edit" page={LearningTreeNodeEditLearningTreeNodePage} name="editLearningTreeNode" />
-        <Route path="/learning-tree-nodes/{id}" page={LearningTreeNodeLearningTreeNodePage} name="learningTreeNode" />
-        <Route path="/learning-tree-nodes" page={LearningTreeNodeLearningTreeNodesPage} name="learningTreeNodes" />
-      </Set>
       <Route path="/" page={HomePage} name="home" />
       <Set wrap={ScaffoldLayout} title="ContentItems" titleTo="contentItems" buttonLabel="New ContentItem" buttonTo="newContentItem">
         <Route path="/content-items/new" page={ContentItemNewContentItemPage} name="newContentItem" />

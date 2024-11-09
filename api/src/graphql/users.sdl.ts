@@ -6,6 +6,7 @@ export const schema = gql`
     averageDriveDurationMinutes: Int!
     goal: String
     ContentItem: [ContentItem]!
+    learningTree: String
   }
 
   type Query {
@@ -18,6 +19,7 @@ export const schema = gql`
     name: String
     averageDriveDurationMinutes: Int!
     goal: String
+    learningTree: String
   }
 
   input UpdateUserInput {
@@ -25,6 +27,7 @@ export const schema = gql`
     name: String
     averageDriveDurationMinutes: Int
     goal: String
+    learningTree: String
   }
 
   type Mutation {

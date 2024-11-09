@@ -54,6 +54,7 @@ const UsersList = ({ users }: FindUsers) => {
             <th>Name</th>
             <th>Average drive duration minutes</th>
             <th>Goal</th>
+            <th>Learning tree</th>
             <th>&nbsp;</th>
           </tr>
         </thead>
@@ -65,6 +66,7 @@ const UsersList = ({ users }: FindUsers) => {
               <td>{truncate(user.name)}</td>
               <td>{truncate(user.averageDriveDurationMinutes)}</td>
               <td>{truncate(user.goal)}</td>
+              <td>{truncate(user.learningTree)}</td>
               <td>
                 <nav className="rw-table-actions">
                   <Link

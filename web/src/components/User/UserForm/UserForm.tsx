@@ -104,10 +104,26 @@ const UserForm = (props: UserFormProps) => {
           defaultValue={props.user?.goal}
           className="rw-input"
           errorClassName="rw-input rw-input-error"
-          validation={{ required: true }}
         />
 
         <FieldError name="goal" className="rw-field-error" />
+
+        <Label
+          name="learningTree"
+          className="rw-label"
+          errorClassName="rw-label rw-label-error"
+        >
+          Learning tree
+        </Label>
+
+        <TextField
+          name="learningTree"
+          defaultValue={props.user?.learningTree}
+          className="rw-input"
+          errorClassName="rw-input rw-input-error"
+        />
+
+        <FieldError name="learningTree" className="rw-field-error" />
 
         <div className="rw-button-group">
           <Submit disabled={props.loading} className="rw-button rw-button-blue">
