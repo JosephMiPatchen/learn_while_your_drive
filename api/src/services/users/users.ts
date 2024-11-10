@@ -1,5 +1,4 @@
-import fs from 'fs'
-import path from 'path'
+
 
 import OpenAI from 'openai'
 import type {
@@ -9,7 +8,7 @@ import type {
 } from 'types/graphql'
 
 import { db } from 'src/lib/db'
-import { queryOpenAi,textToSpeech } from 'src/lib/openAiClient'
+import { queryOpenAi,writeAudioFile} from 'src/lib/openAiClient'
 
 import { tmpdir } from 'os'
 import { join } from 'path'
@@ -17,9 +16,6 @@ import { randomUUID } from 'crypto'
 import { existsSync } from 'fs'
 import { writeFile } from 'fs/promises'
 
-const openAiClient = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY, // This is the default and can be omitted
-})
 
 export const users: QueryResolvers['users'] = () => {
   return db.user.findMany()
@@ -37,14 +33,14 @@ export const createUser: MutationResolvers['createUser'] = ({ input }) => {
   })
 }
 
-function createTopicGenPrompt(learningGoal: string, topicLimit: number = 1): string {
+function createTopicGenPrompt(learningGoal: string): string {
   return `Given the user's monthly learning goal of ${learningGoal},
-  generate a list of up to ${topicLimit} study topics to help them progress towards this goal.
+  generate a list of study topics to help them progress towards this goal.
   Format the response as follows:
   'START: topic1, topic2, ... topic n'`;
 }
 
-function decodeTopics(response: string): string[] {
+function decodeTopics(response: string, n = 1): string[] {
   // Check if the response starts with "START:"
   if (!response.startsWith("START:")) {
     throw new Error("Invalid format: response must start with 'START:'");
@@ -56,38 +52,54 @@ function decodeTopics(response: string): string[] {
   // Split the topics by comma and trim each topic to remove extra whitespace
   const topics = topicsString.split(",").map(topic => topic.trim());
 
-  return topics;
+  return topics.slice(0,n);
 }
 
-// Recursive function to generate teaching paragraphs for each node in the learning tree
-async function generateTeachingParagraphs(node: { topic: string, media: string, subtopics?: any[] }): Promise<void> {
-  const teachingPrompt = `Please provide a brief, beginner-friendly explanation for the topic: "${node.topic}".`
+type LearningNode = {
+  topic: string;
+  media: any;
+  subtopics?: LearningNode[];
+};
+
+const teachingPrompt = `Please provide a brief, beginner-friendly explanation for the topic:`
+const metadataPrompt = `For the below text, create a title and summary. The title should be 2-5 words, and the summary should be a single, attention-grabbing sentence. Please format your responce in:
+Metadata: <insert title> && <insert summary>
+
+here is the lesson
+`
+
+async function createMediaLlmGeneratedLesson(node: LearningNode): Promise<void> {
   try {
-    const response = await queryOpenAi(teachingPrompt)
+    const lessonContent = await queryOpenAi(teachingPrompt + node.topic);
+    const lesson = await writeAudioFile(lessonContent);
+    const metaDataResponse = await queryOpenAi(metadataPrompt + lessonContent);
 
-    // Convert response text to speech and save it to a unique file in the temp directory
-    const audioBuffer = await textToSpeech(response, 'alloy', 'mp3')
-    let filePath
-    do {
-      // Generate a unique file name
-      const fileName = `${randomUUID()}.mp3`
-      filePath = join(tmpdir(), fileName)
-    } while (existsSync(filePath)) // Ensure file name is unique
+    // Extract title and summary from metaDataResponse
+    const titleMatch = metaDataResponse.match(/Metadata: (.*?) &&/);
+    const summaryMatch = metaDataResponse.match(/&& (.*)/);
 
-    // Write the audio buffer to the file
-    await writeFile(filePath, audioBuffer)
+    const title = titleMatch ? titleMatch[1] : "Untitled";
+    const summary = summaryMatch ? summaryMatch[1] : "No summary available.";
 
-    // Set the node's media field to the path of the audio file
-    node.media = filePath
+    // Create JSON object with lessonContent, title, and summary
+    const mediaJson = {
+      title,
+      summary,
+      content: lesson,
+      mediaType: "AudioFile"
+    };
+
+    // Assign JSON object to node.media
+    node.media = mediaJson;
   } catch (error) {
-    console.error(`Error generating teaching paragraph for topic "${node.topic}":`, error)
-    node.media = "Audio file unavailable."
+    console.error(`Error generating teaching paragraph for topic "${node.topic}":`, error);
+    node.media = "Audio file unavailable.";
   }
 
   // If the node has subtopics, recurse for each subtopic
   if (node.subtopics && node.subtopics.length > 0) {
     for (const subtopic of node.subtopics) {
-      await generateTeachingParagraphs(subtopic)
+      await createMediaLlmGeneratedLesson(subtopic);
     }
   }
 }
@@ -117,7 +129,7 @@ export const updateUser: MutationResolvers['updateUser'] = async ({ id, input })
 
           // Generate teaching paragraphs recursively for each topic
           for (const node of learningTree.topics) {
-              await generateTeachingParagraphs(node);
+              await createMediaLlmGeneratedLesson(node);
           }
 
           // Update the learningTree field with the new JSON string
@@ -150,24 +162,37 @@ export const User: UserRelationResolvers = {
   },
 }
 
-// Sends `text` to OpenAI's text-to-speech API and writes the audio file to the filesystem. Returns
-// the path to the audio file.
-const writeAudioFile = async (text: string): Promise<string> => {
-  const response = await openAiClient.audio.speech.create({
-    model: 'tts-1-hd',
-    voice: 'echo',
-    input:
-      text ||
-      `
-      I drink brake fluid
-      They say I'm addicted, but
-      I can always stop
-      `,
-  })
 
-  const buffer = Buffer.from(await response.arrayBuffer())
-  const speechFilePath = path.resolve(`./web/public/${Date.now()}.mp3`)
-  await fs.promises.writeFile(speechFilePath, buffer)
+// get media recs
+// Helper function to recursively search for `media` keys in an object
+const collectMedia = (obj) => {
+  let mediaItems = [];
+  if (typeof obj === 'object' && obj !== null) {
+    for (const key in obj) {
+      if (key === 'media') {
+        mediaItems.push(JSON.stringify(obj[key]));
+      } else if (typeof obj[key] === 'object') {
+        mediaItems = mediaItems.concat(collectMedia(obj[key]));
+      }
+    }
+  }
+  return mediaItems;
+};
 
-  return speechFilePath
-}
+// Main function to get media recommendations
+export const getMediaRecs = async ({ userId }) => {
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    select: { learningTree: true },
+  });
+
+  if (!user || !user.learningTree) {
+    return [];
+  }
+
+  // Parse the JSON and collect media items
+  const learningTree = JSON.parse(user.learningTree);
+  const mediaItems = collectMedia(learningTree);
+
+  return mediaItems;
+};

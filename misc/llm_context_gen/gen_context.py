@@ -23,7 +23,7 @@ def generate_directory_structure(input_dir, ignore_dirs):
 def combine_files(input_dir, output_file):
     # Hardcoded sets of directories and filenames to ignore
     ignore_dirs = {'.git', '.redwood', '.vscode', 'dist', 'node_modules', '.yarn'}
-    ignore_files = {'README.md', 'LICENSE', 'dev.db', 'favicon.png', 'yarn.lock'}
+    ignore_files = {'README.md', 'LICENSE', 'dev.db', 'favicon.png', 'yarn.lock',"1731189115441.mp3","1731184204294.mp3","1731184962046.mp3"}
 
     with open(output_file, 'w') as outfile:
         # Write an introductory description of the project structure

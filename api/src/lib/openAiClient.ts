@@ -1,5 +1,7 @@
 import OpenAI from 'openai'
 import { writeFile } from 'fs/promises'
+import fs from 'fs'
+import path from 'path'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -40,50 +42,24 @@ export const queryOpenAi = async (prompt: string): Promise<string> => {
   }
 }
 
-/**
- * Converts text to speech using OpenAI's text-to-speech model.
- * @param {string} text - The text to convert to speech.
- * @param {"alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer"} [voice='alloy'] - The voice to use for TTS.
- * @param {"mp3" | "opus" | "aac" | "flac" | "wav" | "pcm"} [format='mp3'] - The format of the output audio.
- * @returns {Promise<Buffer>} The audio data buffer from OpenAI's text-to-speech model.
- */
-export const textToSpeech = async (
-  text: string,
-  voice: "alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer" = 'alloy',
-  format: "mp3" | "opus" | "aac" | "flac" | "wav" | "pcm" = 'mp3'
-): Promise<Buffer> => {
-  try {
-    const response = await openai.audio.speech.create({
-      model: 'tts-1',
-      voice,
-      input: text,
-      response_format: format,
-    })
+// Sends `text` to OpenAI's text-to-speech API and writes the audio file to the filesystem. Returns
+// the path to the audio file.
+export const writeAudioFile = async (text: string): Promise<string> => {
+  const response = await openai.audio.speech.create({
+    model: 'tts-1-hd',
+    voice: 'echo',
+    input:
+      text ||
+      `
+      I drink brake fluid
+      They say I'm addicted, but
+      I can always stop
+      `,
+  })
 
-    // Assuming response is a stream or binary data
-    const arrayBuffer = await response.arrayBuffer()
-    const audioBuffer = Buffer.from(arrayBuffer)
-    return audioBuffer
-  } catch (error) {
-    console.error('Error generating text-to-speech:', error)
-    throw new Error('Failed to generate text-to-speech')
-  }
-}
+  const buffer = Buffer.from(await response.arrayBuffer())
+  const speechFilePath = path.resolve(`./web/public/${Date.now()}.mp3`)
+  await fs.promises.writeFile(speechFilePath, buffer)
 
-/**
- * Saves the generated speech audio to a file.
- * @param {string} text - The text to convert to speech.
- * @param {string} outputPath - The file path to save the audio file.
- * @param {"alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer"} [voice='alloy'] - The voice to use for TTS.
- * @param {"mp3" | "opus" | "aac" | "flac" | "wav" | "pcm"} [format='mp3'] - The format of the output audio.
- */
-export const saveTextToSpeechToFile = async (
-  text: string,
-  outputPath: string,
-  voice: "alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer" = 'alloy',
-  format: "mp3" | "opus" | "aac" | "flac" | "wav" | "pcm" = 'mp3'
-) => {
-  const audioBuffer = await textToSpeech(text, voice, format)
-  await writeFile(outputPath, audioBuffer)
-  console.log(`Audio saved to ${outputPath}`)
+  return speechFilePath
 }

@@ -8,8 +8,7 @@ import { Link, routes, navigate } from '@redwoodjs/router'
 import { useMutation } from '@redwoodjs/web'
 import type { TypedDocumentNode } from '@redwoodjs/web'
 import { toast } from '@redwoodjs/web/toast'
-
-import {} from 'src/lib/formatters'
+import { useState } from 'react'
 
 const DELETE_USER_MUTATION: TypedDocumentNode<
   DeleteUserMutation,
@@ -24,6 +23,53 @@ const DELETE_USER_MUTATION: TypedDocumentNode<
 
 interface Props {
   user: NonNullable<FindUserById['user']>
+}
+
+// Helper component for displaying JSON objects with collapsible elements
+const JsonViewer = ({ data, level = 0 }) => {
+  const [isCollapsed, setIsCollapsed] = useState(false)
+
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed)
+  }
+
+  if (typeof data === 'object' && data !== null) {
+    return (
+      <div style={{ paddingLeft: `${level * 1.5}em` }}>
+        <button
+          onClick={toggleCollapse}
+          style={{
+            cursor: 'pointer',
+            background: 'none',
+            border: 'none',
+            color: '#007acc',
+            fontWeight: 'bold',
+            marginRight: '5px',
+          }}
+        >
+          {isCollapsed ? '▶' : '▼'}
+        </button>
+        <span style={{ color: '#007acc', fontWeight: 'bold' }}>
+          {Array.isArray(data) ? '[ ]' : '{ }'}
+        </span>
+        {!isCollapsed &&
+          Object.entries(data).map(([key, value]) => (
+            <div key={key}>
+              <span style={{ color: '#007acc', fontWeight: 'bold' }}>
+                {key}:
+              </span>{' '}
+              {typeof value === 'object' ? (
+                <JsonViewer data={value} level={level + 1} />
+              ) : (
+                <span style={{ color: '#333' }}>{JSON.stringify(value)}</span>
+              )}
+            </div>
+          ))}
+      </div>
+    )
+  }
+
+  return <span style={{ color: '#333' }}>{JSON.stringify(data)}</span>
 }
 
 const User = ({ user }: Props) => {
@@ -42,6 +88,11 @@ const User = ({ user }: Props) => {
       deleteUser({ variables: { id } })
     }
   }
+
+  // Parse learningTree JSON if available, otherwise set to null
+  const parsedLearningTree = user.learningTree
+    ? JSON.parse(user.learningTree)
+    : null
 
   return (
     <>
@@ -75,7 +126,28 @@ const User = ({ user }: Props) => {
             </tr>
             <tr>
               <th>Learning tree</th>
-              <td>{user.learningTree}</td>
+              <td>
+                {parsedLearningTree ? (
+                  <div
+                    style={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.7)', // Frosted glass effect
+                      backdropFilter: 'blur(8px)', // Apply the blur
+                      WebkitBackdropFilter: 'blur(8px)', // Support for Safari
+                      padding: '1em',
+                      borderRadius: '10px',
+                      maxHeight: '400px',
+                      overflowY: 'auto',
+                      whiteSpace: 'pre-wrap',
+                      wordWrap: 'break-word',
+                      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                    }}
+                  >
+                    <JsonViewer data={parsedLearningTree} />
+                  </div>
+                ) : (
+                  <span>No learning tree data available</span>
+                )}
+              </td>
             </tr>
           </tbody>
         </table>

@@ -1,13 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Metadata } from '@redwoodjs/web';
-import { Card, Button, Progress, Typography, Space, Tooltip, Avatar, Modal } from 'antd';
+import { Metadata,useQuery} from '@redwoodjs/web';
+import { Card, Button, Spin, Typography, Space, Tooltip, Avatar, Modal, notification } from 'antd';
 import { CloseOutlined, SoundOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
-import { AudioPlayerModal } from './AudioPlayerModal'
+import { AudioPlayerModal } from './AudioPlayerModal';
 import { ProgressIndicator } from './ProgressIndicator';
 const { Title, Text } = Typography;
 export const accentPink = "#ff4a91";
 
-// Helper function to convert hex to rgba with specified opacity
+export const GET_MEDIA_RECOMMENDATIONS_QUERY = gql`
+  query GetMediaRecommendations($userId: String!) {
+    getMediaRecs(userId: $userId)
+  }
+`;
+
 function hexToRgba(hex: string, opacity: number): string {
   const bigint = parseInt(hex.replace("#", ""), 16);
   const r = (bigint >> 16) & 255;
@@ -16,7 +21,6 @@ function hexToRgba(hex: string, opacity: number): string {
   return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 }
 
-// Function to generate background gradient
 function createGradientBackground(baseColor: string, circleOpacity: number): string {
   return `
     radial-gradient(circle at 20% 45%, ${hexToRgba(baseColor, circleOpacity)}, transparent 25%),
@@ -27,9 +31,9 @@ function createGradientBackground(baseColor: string, circleOpacity: number): str
   `;
 }
 
-// TitleBar Component
+// TitleBar, PageHeader, and LearningTrackCard components remain the sameconst TitleBar: React.FC = () => (
 const TitleBar: React.FC = () => (
-  <div style={{
+<div style={{
     position: 'fixed',
     top: 0,
     left: 0,
@@ -59,7 +63,6 @@ const TitleBar: React.FC = () => (
 type PageHeaderProps = {
   onDelete: () => void;
 };
-
 const PageHeader: React.FC<PageHeaderProps> = ({ onDelete }) => (
   <div style={{
     display: 'flex',
@@ -134,30 +137,44 @@ const LearningTrackCard: React.FC<LearningTrackCardProps> = ({ title, descriptio
 
 );
 
-// Main RecEnginePage Component
 const RecEnginePage: React.FC = () => {
-  const items = [
-    {
-      title: "Types of Q Bits",
-      description: "Intro to the different types of Q bits",
-      audioSrc: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-    },
-    {
-      title: "Hadamard Gates",
-      description: "Basic functionality of the Hadamard single Q bit gate",
-      audioSrc: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-    },
-    {
-      title: "Near Term Algorithms",
-      description: "What are the types of algorithms that can run on quantum computers as of today?",
-      audioSrc: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
-    },
-  ];
-
   const [isModalVisible, setModalVisible] = useState(false);
-  const [selectedAudio, setSelectedAudio] = useState<{ title: string, audioSrc: string } | null>(null);
+  const [selectedAudio, setSelectedAudio] = useState<{ title: string; audioSrc: string } | null>(null);
 
-  const handleListen = (item: { title: string, audioSrc: string }) => {
+  // Redwood useQuery to fetch media recommendations
+  const { loading, error, data } = useQuery(GET_MEDIA_RECOMMENDATIONS_QUERY, {
+    variables: { userId: 'user1' }, // Replace 'USER_ID' with dynamic user ID
+    onCompleted: () => {
+      console.log(data)
+      notification.success({
+        message: 'Success',
+        description: 'Media recommendations loaded successfully.',
+        placement: 'top',
+        duration: 2,
+      });
+    },
+    onError: (error) => {
+      notification.error({
+        message: 'Error',
+        description: 'Failed to load media recommendations.',
+        placement: 'top',
+      });
+      console.error("Error fetching media recommendations:", error);
+    },
+  });
+
+  // Parse each JSON string from getMediaRecs into an object with title, summary, and content fields
+  const items = data?.getMediaRecs?.map((jsonString: string) => {
+    try {
+      return JSON.parse(jsonString);
+    } catch (error) {
+      console.error("Error parsing JSON string:", error);
+      return null;
+    }
+  }).filter(Boolean); // Filter out any null entries from failed parsing
+
+  console.log(items)
+  const handleListen = (item: { title: string; audioSrc: string }) => {
     setSelectedAudio(item);
     setModalVisible(true);
   };
@@ -172,9 +189,9 @@ const RecEnginePage: React.FC = () => {
       <Metadata title="RecEngine" description="RecEngine page" />
       <TitleBar />
       <div style={{
-        padding: '80px 20px 20px', // Add top padding to offset fixed title bar
+        padding: '80px 20px 20px',
         minHeight: '100vh',
-        background: createGradientBackground("#ebc0ed",.5),
+        background: createGradientBackground("#ebc0ed", 0.5),
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -182,18 +199,22 @@ const RecEnginePage: React.FC = () => {
       }}>
         <PageHeader onDelete={() => console.log("Delete Quantum Computer Learning Track")} />
         <ProgressIndicator percent={68} color={accentPink} />
-        <Space direction="vertical" size="large" style={{ width: '100%', maxWidth: '600px' }}>
-          {items.map((item, index) => (
-            <LearningTrackCard
-              key={index}
-              title={item.title}
-              description={item.description}
-              accentColor={accentPink}
-              onListen={() => handleListen(item)}
-            />
-          ))}
-        </Space>
-      </div >
+        {loading ? (
+          <Spin size="large" style={{ marginTop: '20px' }} />
+        ) : (
+          <Space direction="vertical" size="large" style={{ width: '100%', maxWidth: '600px' }}>
+            {items.map((item, index) => (
+              <LearningTrackCard
+                key={index}
+                title={item.title}
+                description={item.summary}
+                accentColor={accentPink}
+                onListen={() => handleListen({ title: item.title, audioSrc: item.content })}
+              />
+            ))}
+          </Space>
+        )}
+      </div>
       {selectedAudio && (
         <AudioPlayerModal
           visible={isModalVisible}

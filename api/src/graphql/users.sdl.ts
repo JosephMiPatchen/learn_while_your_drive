@@ -12,6 +12,7 @@ export const schema = gql`
   type Query {
     users: [User!]! @requireAuth
     user(id: String!): User @requireAuth
+    getMediaRecs(userId: String!): [String!]! @requireAuth
   }
 
   input CreateUserInput {
@@ -36,3 +37,4 @@ export const schema = gql`
     deleteUser(id: String!): User! @requireAuth
   }
 `
+

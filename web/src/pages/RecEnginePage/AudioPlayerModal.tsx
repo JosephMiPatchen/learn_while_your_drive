@@ -13,43 +13,51 @@ type AudioPlayerModalProps = {
 };
 
 export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ visible, onClose, audioSrc, title }) => {
-  const [audio] = useState(new Audio(audioSrc));
+  // Extract filename and generate new output path
+  const filename = audioSrc.split('/').pop(); // Extracts 'filename.mp3' from the path
+  const outputPath = `/${filename}`; // Constructs new path like '/myfile.mp3'
+
+  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const [duration, setDuration] = useState<number>(0);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [isSeeking, setIsSeeking] = useState<boolean>(false);
   const [seekTime, setSeekTime] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isPlaying, setIsPlaying] = useState<boolean>(true);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
   useEffect(() => {
+    // Initialize the audio element with the current outputPath
+    const newAudio = new Audio(outputPath);
+    setAudio(newAudio);
+
+    newAudio.onloadedmetadata = () => {
+      setDuration(newAudio.duration);
+      setIsLoading(false);
+    };
+
+    newAudio.ontimeupdate = () => {
+      if (!isSeeking) {
+        setCurrentTime(newAudio.currentTime);
+      }
+    };
+
+    newAudio.onplaying = () => setIsLoading(false);
+    newAudio.onwaiting = () => setIsLoading(true);
+
     if (visible) {
-      setIsLoading(true); // Show loading spinner initially
-      audio.play();
-      audio.ontimeupdate = () => {
-        if (!isSeeking) {
-          setCurrentTime(audio.currentTime);
-        }
-      };
-      audio.onloadedmetadata = () => {
-        setDuration(audio.duration);
-        setIsLoading(false); // Hide loading spinner once metadata is loaded
-      };
-      audio.onplaying = () => setIsLoading(false); // Hide loading when playing starts
-      audio.onwaiting = () => setIsLoading(true); // Show loading spinner if buffering
-    } else {
-      audio.pause();
-      audio.currentTime = 0;
-      setCurrentTime(0);
+      newAudio.play();
+      setIsPlaying(true);
     }
 
     return () => {
-      audio.pause();
-      audio.ontimeupdate = null;
-      audio.onloadedmetadata = null;
-      audio.onplaying = null;
-      audio.onwaiting = null;
+      newAudio.pause();
+      newAudio.ontimeupdate = null;
+      newAudio.onloadedmetadata = null;
+      newAudio.onplaying = null;
+      newAudio.onwaiting = null;
+      setAudio(null);
     };
-  }, [visible, audio, isSeeking]);
+  }, [outputPath, visible]);
 
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
@@ -64,20 +72,23 @@ export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ visible, onC
   };
 
   const handleSliderAfterChange = (value: number) => {
-    const newTime = (value / 100) * duration;
-    audio.currentTime = newTime;
-    setCurrentTime(newTime);
-    setIsSeeking(false);
+    if (audio) {
+      const newTime = (value / 100) * duration;
+      audio.currentTime = newTime;
+      setCurrentTime(newTime);
+      setIsSeeking(false);
+    }
   };
 
   const togglePlayPause = () => {
-    if (isPlaying) {
-      audio.pause();
-      setIsPlaying(false);
-    } else {
-      setIsLoading(true); // Show loading spinner while resuming
-      audio.play();
-      setIsPlaying(true);
+    if (audio) {
+      if (isPlaying) {
+        audio.pause();
+      } else {
+        setIsLoading(true);
+        audio.play();
+      }
+      setIsPlaying(!isPlaying);
     }
   };
 
