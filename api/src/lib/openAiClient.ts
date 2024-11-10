@@ -1,7 +1,9 @@
-import OpenAI from 'openai'
-import { writeFile } from 'fs/promises'
 import fs from 'fs'
 import path from 'path'
+
+import ffmpegStatic from 'ffmpeg-static'
+import ffmpeg from 'fluent-ffmpeg'
+import OpenAI from 'openai'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -19,7 +21,8 @@ export const queryOpenAi = async (prompt: string): Promise<string> => {
       messages: [
         {
           role: 'system',
-          content: 'You are an assistant that provides educational topics for study goals.',
+          content:
+            'You are an assistant that provides educational topics for study goals.',
         },
         {
           role: 'user',
@@ -58,8 +61,54 @@ export const writeAudioFile = async (text: string): Promise<string> => {
   })
 
   const buffer = Buffer.from(await response.arrayBuffer())
-  const speechFilePath = path.resolve(`./web/public/${Date.now()}.mp3`)
+  const speechFilePath = path.resolve(`./web/public/vocals.mp3`)
   await fs.promises.writeFile(speechFilePath, buffer)
 
-  return speechFilePath
+  const vocals = path.resolve(`./web/public/vocals.mp3`)
+  const background =
+    'https://incompetech.com/music/royalty-free/mp3-royaltyfree/Odyssey.mp3'
+  const output = path.resolve(`./web/public/combined.mp3`)
+  await overlayAudioTracks(vocals, background, output)
+
+  return '/web/public/combined.mp3'
+}
+
+ffmpeg.setFfmpegPath(ffmpegStatic)
+
+async function overlayAudioTracks(
+  vocals: string,
+  background: string,
+  output: string
+) {
+  return new Promise<void>((resolve, reject) => {
+    ffmpeg()
+      .input(vocals)
+      .input(background)
+      .complexFilter([
+        {
+          filter: 'volume',
+          options: { volume: 0.05 },
+          inputs: '1:a',
+          outputs: 'lowered',
+        },
+        {
+          filter: 'amix',
+          options: {
+            inputs: 2,
+            duration: 'first',
+          },
+          inputs: ['0:a', 'lowered'],
+        },
+      ])
+      .output(output)
+      .on('end', () => {
+        console.log('Audio overlay complete')
+        resolve()
+      })
+      .on('error', (err) => {
+        console.error('Error:', err)
+        reject(err)
+      })
+      .run()
+  })
 }
