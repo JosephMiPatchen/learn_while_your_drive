@@ -67,10 +67,11 @@ export const writeAudioFile = async (text: string): Promise<string> => {
   const vocals = path.resolve(`./web/public/vocals.mp3`)
   const background =
     'https://incompetech.com/music/royalty-free/mp3-royaltyfree/Odyssey.mp3'
-  const output = path.resolve(`./web/public/combined.mp3`)
+  const combinedFilename = 'combined.mp3'
+  const output = path.resolve('./web/public/' + combinedFilename)
   await overlayAudioTracks(vocals, background, output)
 
-  return '/web/public/combined.mp3'
+  return combinedFilename
 }
 
 ffmpeg.setFfmpegPath(ffmpegStatic)
