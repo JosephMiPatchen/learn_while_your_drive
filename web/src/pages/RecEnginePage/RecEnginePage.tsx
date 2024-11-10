@@ -112,7 +112,6 @@ const LearningTrackCard: React.FC<LearningTrackCardProps> = ({ title, descriptio
   <Card
   style={{
     borderRadius: '12px', // More rounded corners for a smoother effect
-    padding: '16px 20px', // Slightly increased padding for content spacing
     background: 'rgba(255, 255, 255, 0.3)', // Higher transparency for frosted look
     boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)', // Softer shadow to create depth
     border: '1px solid rgba(255, 255, 255, 0.18)', // Light border for frosty edges

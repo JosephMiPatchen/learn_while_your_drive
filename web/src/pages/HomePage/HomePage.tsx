@@ -89,7 +89,7 @@ const HomePage: React.FC = () => {
         </Typography.Title>
 
         <Card style={{
-          width: '100%', maxWidth: '600px', borderRadius: '12px', padding: '24px',
+          width: '100%', maxWidth: '600px', borderRadius: '12px',
           background: 'rgba(255, 255, 255, 0.3)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
           border: '1px solid rgba(255, 255, 255, 0.18)', backdropFilter: 'blur(12px)',
         }}>
