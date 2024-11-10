@@ -16,14 +16,15 @@ def generate_directory_structure(input_dir, ignore_dirs):
         structure.append(f"{indent}{os.path.basename(root)}/")
 
         for file in files:
-            if not file.startswith('.'):
+            # Skip hidden files and files with .mp3 extension
+            if not file.startswith('.') and not file.endswith('.mp3'):
                 structure.append(f"{indent}    {file}")
     return "\n".join(structure)
 
 def combine_files(input_dir, output_file):
     # Hardcoded sets of directories and filenames to ignore
     ignore_dirs = {'.git', '.redwood', '.vscode', 'dist', 'node_modules', '.yarn'}
-    ignore_files = {'README.md', 'LICENSE', 'dev.db', 'favicon.png', 'yarn.lock',"1731189115441.mp3","1731184204294.mp3","1731184962046.mp3"}
+    ignore_files = {'README.md', 'LICENSE', 'dev.db', 'favicon.png', 'yarn.lock'}
 
     with open(output_file, 'w') as outfile:
         # Write an introductory description of the project structure
@@ -44,8 +45,8 @@ def combine_files(input_dir, output_file):
             for file in files:
                 file_path = os.path.join(root, file)
 
-                # Check only the base name of the file against ignore_files
-                if not file.startswith('.') and os.path.basename(file) not in ignore_files and os.path.isfile(file_path):
+                # Skip hidden files, .mp3 files, and files listed in ignore_files
+                if not file.startswith('.') and not file.endswith('.mp3') and os.path.basename(file) not in ignore_files and os.path.isfile(file_path):
                     try:
                         with open(file_path, 'r') as infile:
                             # Write filename as a header in the output file
