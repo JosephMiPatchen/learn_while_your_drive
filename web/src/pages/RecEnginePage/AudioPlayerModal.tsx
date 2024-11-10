@@ -12,10 +12,50 @@ type AudioPlayerModalProps = {
   title: string;
 };
 
+// Helper functions to handle cookies
+
+// Function to get a cookie by name
+const getCookie = (name: string): string | undefined => {
+  const cookieArr = document.cookie.split("; ");
+  for (const cookie of cookieArr) {
+    const [key, value] = cookie.split("=");
+    if (key === decodeURIComponent(name)) {
+      return decodeURIComponent(value);
+    }
+  }
+  return undefined;
+};
+
+// Function to set a cookie
+const setCookie = (name: string, value: string, options: Record<string, any> = {}) => {
+  options = {
+    path: '/',
+    ...options,
+  };
+
+  if (options.expires instanceof Date) {
+    options.expires = options.expires.toUTCString();
+  }
+
+  let updatedCookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}`;
+
+  for (const optionKey in options) {
+    updatedCookie += `; ${optionKey}`;
+    const optionValue = options[optionKey];
+    if (optionValue !== true) {
+      updatedCookie += `=${optionValue}`;
+    }
+  }
+
+  document.cookie = updatedCookie;
+};
+
+
+
+// Component
 export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ visible, onClose, audioSrc, title }) => {
-  // Extract filename and generate new output path
-  const filename = audioSrc.split('/').pop(); // Extracts 'filename.mp3' from the path
-  const outputPath = `/${filename}`; // Constructs new path like '/myfile.mp3'
+  const filename = audioSrc.split('/').pop() || 'audio';
+  const outputPath = `/${filename}`;
 
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const [duration, setDuration] = useState<number>(0);
@@ -29,6 +69,13 @@ export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ visible, onC
     // Initialize the audio element with the current outputPath
     const newAudio = new Audio(outputPath);
     setAudio(newAudio);
+
+    // Retrieve saved playback position from cookies
+    const savedTime = parseFloat(getCookie(filename) || '0');
+    if (!isNaN(savedTime) && savedTime > 0) {
+      newAudio.currentTime = savedTime;
+      setCurrentTime(savedTime);
+    }
 
     newAudio.onloadedmetadata = () => {
       setDuration(newAudio.duration);
@@ -50,6 +97,8 @@ export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ visible, onC
     }
 
     return () => {
+      // Save the current time to cookies when the component unmounts
+      setCookie(filename, newAudio.currentTime.toString(), { 'max-age': 31536000 });
       newAudio.pause();
       newAudio.ontimeupdate = null;
       newAudio.onloadedmetadata = null;
@@ -84,6 +133,8 @@ export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ visible, onC
     if (audio) {
       if (isPlaying) {
         audio.pause();
+        // Save the current time to cookies when pausing
+        setCookie(filename, audio.currentTime.toString(), { 'max-age': 31536000 });
       } else {
         setIsLoading(true);
         audio.play();
