@@ -31,31 +31,6 @@ export default async () => {
       ],
     })
 
-    // Seed ContentItems
-    await db.contentItem.createMany({
-      data: [
-        {
-          id: 'content1',
-          title: 'Introduction to Redwood',
-          description: 'Learn the basics of Redwood',
-          url: 'https://redwoodjs.com/tutorial',
-          userId: 'user1',
-        },
-        {
-          id: 'content2',
-          title: 'Setting up Prisma',
-          description: 'Learn how to set up Prisma in Redwood',
-          userId: 'user1',
-        },
-        {
-          id: 'content3',
-          title: 'How to start a blog',
-          description: 'Guide to starting a blog',
-          userId: 'user2',
-        },
-      ],
-    })
-
     console.info('\n🌱 Database has been seeded successfully!\n')
   } catch (error) {
     console.error(error)
