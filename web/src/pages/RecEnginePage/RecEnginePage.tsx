@@ -4,6 +4,7 @@ import { Card, Button, Spin, Typography, Space, Tooltip, Avatar, Modal, notifica
 import { CloseOutlined, SoundOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
 import { AudioPlayerModal } from './AudioPlayerModal';
 import { ProgressIndicator } from './ProgressIndicator';
+import { Link } from '@redwoodjs/router';
 const { Title, Text } = Typography;
 export const accentPink = "#ff4a91";
 
@@ -70,9 +71,8 @@ const TitleBar: React.FC = () => (
 // PageHeader Component
 type PageHeaderProps = {
   title: string;
-  onDelete: () => void;
 };
-const PageHeader: React.FC<PageHeaderProps> = ({ title, onDelete }) => (
+const PageHeader: React.FC<PageHeaderProps> = ({ title }) => (
   <div style={{
     display: 'flex',
     alignItems: 'center',
@@ -85,17 +85,18 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, onDelete }) => (
     background: 'white'
   }}>
     <Title level={2} style={{ color: '#333', margin: 0 }}>{title}</Title>
-    <Button
-      type="text"
-      icon={<CloseOutlined />}
-      onClick={onDelete}
-      style={{
-        color: '#333',
-        fontSize: '18px',
-        padding: 0,
-        marginLeft: 'auto',
-      }}
-    />
+    <Link to="/">
+      <Button
+        type="text"
+        icon={<CloseOutlined />}
+        style={{
+          color: '#333',
+          fontSize: '18px',
+          padding: 0,
+          marginLeft: 'auto',
+        }}
+      />
+    </Link>
   </div>
 );
 
