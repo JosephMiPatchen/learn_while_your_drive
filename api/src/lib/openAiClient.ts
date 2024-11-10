@@ -88,7 +88,7 @@ async function overlayAudioTracks(
       .complexFilter([
         {
           filter: 'volume',
-          options: { volume: 0.05 },
+          options: { volume: 0.01 },
           inputs: '1:a',
           outputs: 'lowered',
         },
