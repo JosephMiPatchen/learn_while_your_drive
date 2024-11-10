@@ -7,6 +7,14 @@ import { ProgressIndicator } from './ProgressIndicator';
 const { Title, Text } = Typography;
 export const accentPink = "#ff4a91";
 
+const GET_USER_QUERY = gql`
+  query GetUser($userId: String!) {
+    user(id: $userId) {
+      learningTree
+    }
+  }
+`;
+
 export const GET_MEDIA_RECOMMENDATIONS_QUERY = gql`
   query GetMediaRecommendations($userId: String!) {
     getMediaRecs(userId: $userId)
@@ -61,9 +69,10 @@ const TitleBar: React.FC = () => (
 
 // PageHeader Component
 type PageHeaderProps = {
+  title: string;
   onDelete: () => void;
 };
-const PageHeader: React.FC<PageHeaderProps> = ({ onDelete }) => (
+const PageHeader: React.FC<PageHeaderProps> = ({ title, onDelete }) => (
   <div style={{
     display: 'flex',
     alignItems: 'center',
@@ -75,7 +84,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ onDelete }) => (
     borderBottom: '1px solid #f0f0f0',
     background: 'white'
   }}>
-    <Title level={2} style={{ color: '#333', margin: 0 }}>Quantum Computer Learning Track</Title>
+    <Title level={2} style={{ color: '#333', margin: 0 }}>{title}</Title>
     <Button
       type="text"
       icon={<CloseOutlined />}
@@ -141,6 +150,11 @@ const RecEnginePage: React.FC = () => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedAudio, setSelectedAudio] = useState<{ title: string; audioSrc: string } | null>(null);
 
+  // Fetch user data
+  const { loading: userLoading, error: userError, data: userData } = useQuery(GET_USER_QUERY, {
+    variables: { userId: 'user1' }, // Replace 'user1' with dynamic user ID
+  });
+
   // Redwood useQuery to fetch media recommendations
   const { loading, error, data } = useQuery(GET_MEDIA_RECOMMENDATIONS_QUERY, {
     variables: { userId: 'user1' }, // Replace 'USER_ID' with dynamic user ID
@@ -162,6 +176,11 @@ const RecEnginePage: React.FC = () => {
       console.error("Error fetching media recommendations:", error);
     },
   });
+
+  if (userLoading || loading) return <p>Loading...</p>;
+  if (userError || error) return <p>Error: {userError?.message || error?.message}</p>;
+
+  const user = userData.user;
 
   // Parse each JSON string from getMediaRecs into an object with title, summary, and content fields
   const items = data?.getMediaRecs?.map((jsonString: string) => {
@@ -197,7 +216,7 @@ const RecEnginePage: React.FC = () => {
         alignItems: 'center',
         filter: isModalVisible ? 'blur(5px)' : 'none',
       }}>
-        <PageHeader onDelete={() => console.log("Delete Quantum Computer Learning Track")} />
+        <PageHeader title={JSON.parse(user.learningTree).learningTrackName} onDelete={() => console.log("Delete Quantum Computer Learning Track")} />
         <ProgressIndicator percent={68} color={accentPink} />
         {loading ? (
           <Spin size="large" style={{ marginTop: '20px' }} />

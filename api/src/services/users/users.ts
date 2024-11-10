@@ -124,8 +124,14 @@ export const updateUser: MutationResolvers['updateUser'] = async ({ id, input })
                   topic,
                   media: "",
                   subtopics: []  // Initialize as empty array for now; future enhancements can add subtopics
-              }))
+              })),
+              learningTrackName: "",
           };
+
+          // Generate a learning track name based on the user's goal
+          learningTree.learningTrackName = await queryOpenAi(
+            `Given the user's learning goal of ${input.goal}, generate a name for their learning track. Please do not use quotation marks in the name.`
+          )
 
           // Generate teaching paragraphs recursively for each topic
           for (const node of learningTree.topics) {
