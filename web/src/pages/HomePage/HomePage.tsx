@@ -1,54 +1,43 @@
+// src/pages/HomePage/HomePage.tsx
 import React, { useState } from 'react'
-import { SettingOutlined, UserOutlined } from '@ant-design/icons'
-import { Button, Card, Form, Input, Typography, notification } from 'antd'
+import { Form, Input, Typography, notification } from 'antd'
 import { Metadata, useMutation } from '@redwoodjs/web'
 import { navigate, routes } from '@redwoodjs/router'
+import { RocketOutlined, SendOutlined } from '@ant-design/icons'
+import BottomToolBar from 'src/components/BottomToolBar'
+import { ACCENT } from 'src/constants'
+import TriangleLogo from 'src/components/TriangleLogo'
 
-const accentPink = '#ff4a91'
+const { Title, Text } = Typography
 
 const UPDATE_USER_GOAL_MUTATION = gql`
   mutation UpdateUserGoal($id: String!, $goal: String!) {
     updateUser(id: $id, input: { goal: $goal }) {
       id
       goal
+      latestJobId
     }
   }
 `
-
-const TitleBar: React.FC = () => (
-  <div style={{
-    position: 'fixed', top: 0, left: 0, right: 0, height: '60px',
-    background: '#ffffff', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-    padding: '0 20px', zIndex: 1000,
-  }}>
-    <Typography.Title level={3} style={{ margin: 0, color: '#333' }}>
-      Drive & Learn
-    </Typography.Title>
-    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-      <Button type="text" icon={<SettingOutlined style={{ fontSize: '20px', color: accentPink }} />} />
-      <Button type="text" icon={<UserOutlined style={{ fontSize: '20px', color: accentPink }} />} />
-    </div>
-  </div>
-)
 
 const HomePage: React.FC = () => {
   const [loading, setLoading] = useState(false)
 
   const [updateUserGoal] = useMutation(UPDATE_USER_GOAL_MUTATION, {
-    onCompleted: () => {
+    onCompleted: (data) => {
+      const latestJobId = data.updateUser.latestJobId
       notification.success({
-        message: 'Success!',
-        description: 'Learning Tree created successfully!',
+        message: 'Goal Received!',
+        description: 'Creating your personalized learning journey...',
         placement: 'top',
         duration: 2,
       })
-      navigate(routes.recEngine())
+      navigate(routes.recEngine({ jobId: latestJobId }))
     },
     onError: (error) => {
       notification.error({
         message: 'Error',
-        description: error.message || 'Failed to update user goal.',
+        description: error.message || 'Failed to update goal.',
         placement: 'top',
       })
       setLoading(false)
@@ -57,10 +46,8 @@ const HomePage: React.FC = () => {
 
   const handleSubmit = async (values) => {
     setLoading(true)
-
     try {
       await updateUserGoal({ variables: { id: 'user1', goal: values.description } })
-      //await createLearningTree({ variables: { input: { userId: 'user1' } } })
     } catch (error) {
       setLoading(false)
     }
@@ -70,67 +57,148 @@ const HomePage: React.FC = () => {
     <>
       <Metadata title="Home" description="Home page" />
 
-      <TitleBar />
       <div style={{
-        padding: '80px 20px 20px',
+        padding: '20px 20px 80px',
         minHeight: '100vh',
-        background: `
-          radial-gradient(circle at 10% 50%, rgba(255, 74, 145, 0.2), transparent 25%),
-          radial-gradient(circle at 40% 30%, rgba(255, 74, 145, 0.1), transparent 25%),
-          radial-gradient(circle at 70% 60%, rgba(255, 74, 145, 0.2), transparent 25%),
-          radial-gradient(circle at 90% 80%, rgba(255, 74, 145, 0.05), transparent 25%),
-          linear-gradient(to bottom, #ffffff, rgba(255, 74, 145, 0.05))
-        `,
-        display: 'flex', flexDirection: 'column', alignItems: 'center',
-        transition: 'filter 0.5s ease',
+        background: `linear-gradient(180deg,
+          rgba(255, 74, 145, 0.08) 0%,
+          rgba(255, 74, 145, 0.03) 100%)`,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
       }}>
-        <Typography.Title level={2} style={{ color: '#333', margin: '20px 0' }}>
-          What's your learning goal?
-        </Typography.Title>
+        {/* Header Section */}
+        <div style={{
+  textAlign: 'center',
+  paddingTop: '50px',
+  paddingBottom: '24px',
+}}>
+          <TriangleLogo style={{
+            marginBottom: '20px'
+          }}/>
 
-        <Card style={{
-          width: '100%', maxWidth: '600px', borderRadius: '12px',
-          background: 'rgba(255, 255, 255, 0.3)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-          border: '1px solid rgba(255, 255, 255, 0.18)', backdropFilter: 'blur(12px)',
-        }}>
-          <Form onFinish={handleSubmit} initialValues={{ description: '' }} layout="vertical">
-            <Form.Item name="description" label="Learning Goal" rules={[
-              { required: true, message: 'Please enter your learning goal' },
-            ]}>
-              <Input.TextArea rows={4} placeholder="Describe your goal..." style={{
-                borderRadius: '8px', padding: '12px', background: 'rgba(255, 255, 255, 0.6)',
-              }} />
-            </Form.Item>
+          <Title level={2} style={{
+            marginBottom: '16px',
+            background: `linear-gradient(135deg, ${ACCENT}, #FF8C69)`,
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}>
+            What would you like to learn?
+          </Title>
+          <Text style={{
+            fontSize: '16px',
+            color: '#666',
+            display: 'block',
+            maxWidth: '600px',
+            margin: '0 auto'
+          }}>
+            Share your learning goal, and I'll create a personalized learning journey for you.
+          </Text>
+        </div>
 
-            <Form.Item>
-              <Button type="primary" htmlType="submit" style={{
-                backgroundColor: accentPink, borderColor: accentPink, color: '#fff',
-                borderRadius: '8px', width: '100%', height: '40px', fontWeight: 'bold',
-              }}>
-                Submit
-              </Button>
-            </Form.Item>
-          </Form>
-        </Card>
+        {/* Form Section */}
+        <div style={{
+  width: '100%',
+  padding: '0 20px',
+  marginTop: '20px',
+}}>
+<div style={{
+  background: 'rgba(255, 255, 255, 0.8)',
+  borderRadius: '20px',
+  padding: '16px',
+  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
+  backdropFilter: 'blur(8px)',
+  border: '1px solid rgba(255, 255, 255, 0.18)',
+}}>
+            <Form onFinish={handleSubmit} layout="vertical">
+              <Form.Item
+                name="description"
+                rules={[{ required: true, message: 'Please describe your learning goal' }]}
+              >
+<Input.TextArea
+  placeholder="I want to learn about..."
+  autoSize={{ minRows: 6, maxRows: 7 }}
+  style={{
+    border: '1px solid #eee',
+    borderRadius: '16px',
+    padding: '12px',
+    fontSize: '16px',
+    resize: 'none',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+  }}
+/>
+              </Form.Item>
+              <Form.Item>
+              <button
+  type="submit"
+  disabled={loading}
+  style={{
+    width: '100%',
+    padding: '16px',
+    border: 'none',
+    borderRadius: '16px',
+    background: `linear-gradient(135deg, ${ACCENT}, #FF8C69)`,
+    color: 'white',
+    fontSize: '18px',
+    fontWeight: 'bold',
+    marginTop: '16px',
+    cursor: loading ? 'not-allowed' : 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    opacity: loading ? 0.7 : 1,
+    transition: 'all 0.3s ease',
+  }}
+>
+                  {loading ? 'Creating your journey...' : (
+                    <>
+                      Begin Learning Journey
+                      <SendOutlined />
+                    </>
+                  )}
+                </button>
+              </Form.Item>
+            </Form>
+          </div>
+        </div>
       </div>
 
       {loading && (
         <div style={{
-          position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          backgroundColor: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(3px)', zIndex: 2000,
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'blur(8px)',
+          zIndex: 2000,
           flexDirection: 'column',
         }}>
-          <Typography.Title level={3} style={{ color: 'black', fontWeight: 'bold', marginBottom: '10px' }}>
-            Creating your learning plan...
-          </Typography.Title>
-          <div style={{ display: 'flex', gap: '6px', marginTop: '10px' }}>
-            <div className="dot" style={{ animationDelay: '0s' }} />
-            <div className="dot" style={{ animationDelay: '0.2s' }} />
-            <div className="dot" style={{ animationDelay: '0.4s' }} />
+          <Title level={3} style={{
+            color: ACCENT,
+            marginBottom: '20px',
+            textAlign: 'center'
+          }}>
+            Creating your personalized<br/>learning journey...
+          </Title>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className="dot"
+                style={{ animationDelay: `${i * 0.2}s` }}
+              />
+            ))}
           </div>
         </div>
       )}
+
+      <BottomToolBar />
 
       <style>
         {`
@@ -138,7 +206,7 @@ const HomePage: React.FC = () => {
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background-color: ${accentPink};
+            background-color: ${ACCENT};
             animation: bounce 0.6s infinite alternate;
           }
           @keyframes bounce {
@@ -151,4 +219,4 @@ const HomePage: React.FC = () => {
   )
 }
 
-export default HomePage
+export default HomePage;

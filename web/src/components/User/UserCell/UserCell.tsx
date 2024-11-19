@@ -18,6 +18,7 @@ export const QUERY: TypedDocumentNode<FindUserById, FindUserByIdVariables> =
         averageDriveDurationMinutes
         goal
         learningTree
+        latestJobId
       }
     }
   `

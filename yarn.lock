@@ -7390,6 +7390,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@uiw/react-json-view@npm:^2.0.0-alpha.30":
+  version: 2.0.0-alpha.30
+  resolution: "@uiw/react-json-view@npm:2.0.0-alpha.30"
+  peerDependencies:
+    "@babel/runtime": ">=7.10.0"
+    react: ">=18.0.0"
+    react-dom: ">=18.0.0"
+  checksum: 10c0/42a93debd57398c4d989f28ce4dac8bf549809a63f7000275c5877d09c45e0a9dbc809a01cf7161097cd2b0878546bcd79bac58ceff4787ccec7dd46ca3df449
+  languageName: node
+  linkType: hard
+
 "@ungap/structured-clone@npm:^1.2.0":
   version: 1.2.0
   resolution: "@ungap/structured-clone@npm:1.2.0"
@@ -16909,6 +16920,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-json-view-lite@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "react-json-view-lite@npm:2.0.1"
+  peerDependencies:
+    react: ^18.0.0
+  checksum: 10c0/2d06c7173dc5d4a1bd9caeadf3363a9f3b4473317a50d2d60afe8cfd129b7768d061291e49bac5c7ad1d96e14e28a05b36c11559c20e3990b7cec69dc7da17ab
+  languageName: node
+  linkType: hard
+
 "react-refresh@npm:0.14.0":
   version: 0.14.0
   resolution: "react-refresh@npm:0.14.0"
@@ -17522,9 +17542,11 @@ __metadata:
     "@react-spring/web": "npm:^9.7.5"
     "@redwoodjs/core": "npm:8.4.0"
     "@redwoodjs/project-config": "npm:8.4.0"
+    "@uiw/react-json-view": "npm:^2.0.0-alpha.30"
     antd: "npm:^5.21.6"
     aws-sdk: "npm:^2.1691.0"
     openai: "npm:^4.70.2"
+    react-json-view-lite: "npm:^2.0.1"
     react-transition-group: "npm:^4.4.5"
   languageName: unknown
   linkType: soft

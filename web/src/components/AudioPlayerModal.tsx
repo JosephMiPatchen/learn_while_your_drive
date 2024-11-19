@@ -50,10 +50,8 @@ const setCookie = (name: string, value: string, options: Record<string, any> = {
   document.cookie = updatedCookie;
 };
 
-
-
 // Component
-export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ visible, onClose, audioSrc, title }) => {
+const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ visible, onClose, audioSrc, title }) => {
   const filename = audioSrc.split('/').pop() || 'audio';
   const outputPath = `/${filename}`;
 
@@ -191,11 +189,7 @@ export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ visible, onC
           type="primary"
           icon={isPlaying ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
           style={{
-            minWidth: '60px',
-            boxSizing: 'content-box',
             marginTop: '20px',
-            marginLeft: 'auto',
-            marginRight: 'auto',
             backgroundColor: accentPink,
             borderColor: accentPink,
             color: '#fff',
@@ -206,9 +200,11 @@ export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ visible, onC
             opacity: isLoading ? 0.5 : 1, // Button transparency when loading
           }}
         >
-          {isPlaying ? 'Pause' : 'Resume'}
+          {isPlaying ? 'Pause Listening' : 'Resume Listening'}
         </Button>
       )}
     </Modal>
   );
 };
+
+export default AudioPlayerModal

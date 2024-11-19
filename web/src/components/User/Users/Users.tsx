@@ -23,11 +23,7 @@ const DELETE_USER_MUTATION: TypedDocumentNode<
   }
 `
 
-interface UsersListProps {
-  users: FindUsers['users'] // Correctly typed users prop
-}
-
-const UsersList = ({ users }: UsersListProps) => {
+const UsersList = ({ users }: FindUsers) => {
   const [deleteUser] = useMutation(DELETE_USER_MUTATION, {
     onCompleted: () => {
       toast.success('User deleted')
@@ -35,6 +31,9 @@ const UsersList = ({ users }: UsersListProps) => {
     onError: (error) => {
       toast.error(error.message)
     },
+    // This refetches the query on the list page. Read more about other ways to
+    // update the cache over here:
+    // https://www.apollographql.com/docs/react/data/mutations/#making-all-other-cache-updates
     refetchQueries: [{ query: QUERY }],
     awaitRefetchQueries: true,
   })
@@ -56,6 +55,7 @@ const UsersList = ({ users }: UsersListProps) => {
             <th>Average drive duration minutes</th>
             <th>Goal</th>
             <th>Learning tree</th>
+            <th>Latest job id</th>
             <th>&nbsp;</th>
           </tr>
         </thead>
@@ -68,6 +68,7 @@ const UsersList = ({ users }: UsersListProps) => {
               <td>{truncate(user.averageDriveDurationMinutes)}</td>
               <td>{truncate(user.goal)}</td>
               <td>{truncate(user.learningTree)}</td>
+              <td>{truncate(user.latestJobId)}</td>
               <td>
                 <nav className="rw-table-actions">
                   <Link

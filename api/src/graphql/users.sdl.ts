@@ -7,6 +7,7 @@ export const schema = gql`
     goal: String
     ContentItem: [ContentItem]!
     learningTree: String
+    latestJobId: String
   }
 
   type Query {
@@ -21,6 +22,7 @@ export const schema = gql`
     averageDriveDurationMinutes: Int!
     goal: String
     learningTree: String
+    latestJobId: String
   }
 
   input UpdateUserInput {
@@ -29,6 +31,7 @@ export const schema = gql`
     averageDriveDurationMinutes: Int
     goal: String
     learningTree: String
+    latestJobId: String
   }
 
   type Mutation {
@@ -37,4 +40,3 @@ export const schema = gql`
     deleteUser(id: String!): User! @requireAuth
   }
 `
-

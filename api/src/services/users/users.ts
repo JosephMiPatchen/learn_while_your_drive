@@ -6,7 +6,7 @@ import type {
   QueryResolvers,
   UserRelationResolvers,
 } from 'types/graphql'
-
+import { v4 as uuidv4 } from 'uuid'
 import { db } from 'src/lib/db'
 import { queryOpenAi,writeAudioFile} from 'src/lib/openAiClient'
 
@@ -40,7 +40,7 @@ function createTopicGenPrompt(learningGoal: string): string {
   'START: topic1, topic2, ... topic n'`;
 }
 
-function decodeTopics(response: string, n = 1): string[] {
+function decodeTopics(response: string, n = 3): string[] {
   // Check if the response starts with "START:"
   if (!response.startsWith("START:")) {
     throw new Error("Invalid format: response must start with 'START:'");
@@ -68,7 +68,7 @@ Metadata: <insert title> && <insert summary>
 here is the lesson
 `
 
-async function createMediaLlmGeneratedLesson(node: LearningNode): Promise<void> {
+async function createMediaLlmGeneratedLesson(node: LearningNode): Promise<LearningNode> {
   try {
     const lessonContent = await queryOpenAi(teachingPrompt + node.topic);
     const lesson = await writeAudioFile(lessonContent);
@@ -102,54 +102,131 @@ async function createMediaLlmGeneratedLesson(node: LearningNode): Promise<void> 
       await createMediaLlmGeneratedLesson(subtopic);
     }
   }
+
+  return Promise.resolve(node)
 }
 
 // Main updateUser mutation resolver
 export const updateUser: MutationResolvers['updateUser'] = async ({ id, input }) => {
-  const user = await db.user.findUnique({ where: { id } });
-
   if (input.goal) {
-      const prompt = createTopicGenPrompt(input.goal);
+    const jobId = uuidv4();
 
+    // Initialize JobStatus with 'Pending'
+    await db.jobStatus.create({
+      data: {
+        id: jobId,
+        userId: id,
+        status: 'Pending',
+        totalTopics: 0,
+        currentTopics: 0,
+      },
+    });
+
+    // Update the user’s latestJobId
+    await db.user.update({
+      where: { id },
+      data: { latestJobId: jobId },
+    });
+
+    setTimeout(async () => {
       try {
-          // Send the prompt to ChatGPT and get the response
-          const chatResponse = await queryOpenAi(prompt);
+        await db.jobStatus.update({
+          where: { id: jobId },
+          data: { status: 'In Progress' },
+        });
 
-          // Decode topics from the chat response
-          const topicsArray = decodeTopics(chatResponse);
+        // Generate initial learning tree structure
+        const prompt = createTopicGenPrompt(input.goal);
+        const chatResponse = await queryOpenAi(prompt);
+        const topicsArray = decodeTopics(chatResponse);
 
-          // Create JSON structure with each topic node (topic, media, and subtopics fields)
-          const learningTree = {
-              topics: topicsArray.map(topic => ({
-                  topic,
-                  media: "",
-                  subtopics: []  // Initialize as empty array for now; future enhancements can add subtopics
-              })),
-              learningTrackName: "",
-          };
+        // Create nodes without media in the first pass
+        const learningTree = {
+          topics: topicsArray.map((topic) => ({
+            topic,
+            subtopics: [],
+          })),
+        };
 
-          // Generate a learning track name based on the user's goal
-          learningTree.learningTrackName = await queryOpenAi(
-            `Given the user's learning goal of ${input.goal}, generate a name for their learning track. Please do not use quotation marks in the name.`
-          )
+        // Traverse to count total topics and populate empty nodes
+        const countTopics = (nodes) => {
+          let count = 0;
 
-          // Generate teaching paragraphs recursively for each topic
-          for (const node of learningTree.topics) {
-              await createMediaLlmGeneratedLesson(node);
+          for (const node of nodes) {
+            count += 1; // Count the current node
+            if (node.subtopics && node.subtopics.length > 0) {
+              count += countTopics(node.subtopics); // Recurse on subtopics
+            }
           }
 
-          // Update the learningTree field with the new JSON string
-          input.learningTree = JSON.stringify(learningTree);
+          return count;
+        };
+
+        const totalTopicsCount = countTopics(learningTree.topics)
+        await db.jobStatus.update({
+          where: { id: jobId },
+          data: { totalTopics: totalTopicsCount },
+        });
+        await db.user.update({
+          where: { id },
+          data: { learningTree: JSON.stringify(learningTree) },
+        });
+
+        // Depth-first traversal to update media and currentTopics
+        const updateMediaForNode = async (node, parentNodePath = []) => {
+          // Generate media for the node
+          node = await createMediaLlmGeneratedLesson(node);
+
+          // Update currentTopics in JobStatus
+          await db.jobStatus.update({
+            where: { id: jobId },
+            data: { currentTopics: { increment: 1 } },
+          });
+
+          // Save the updated learning tree in the user's record after each topic is processed
+          await db.user.update({
+            where: { id },
+            data: { learningTree: JSON.stringify(learningTree) },
+          });
+
+          // Recursively update media for subtopics
+          if (node.subtopics) {
+              for (const subtopic of node.subtopics) {
+                await updateMediaForNode(subtopic, [...parentNodePath, node.topic]);
+              }
+            }
+        };
+
+        // Run depth-first traversal to add media for each topic in learningTree
+        for (const topicNode of learningTree.topics) {
+          await updateMediaForNode(topicNode);
+        }
+
+        // Save final learning tree to the user record
+        await db.user.update({
+          where: { id },
+          data: { learningTree: JSON.stringify(learningTree) },
+        });
+
+        // Update job status to 'Completed'
+        await db.jobStatus.update({
+          where: { id: jobId },
+          data: { status: 'Completed' },
+        });
       } catch (error) {
-          console.error('Error updating learningTree with ChatGPT response:', error);
-          throw new Error('Failed to update learningTree');
+        console.error('Learning tree generation failed:', error);
+        await db.jobStatus.update({
+          where: { id: jobId },
+          data: { status: 'Failed' },
+        });
       }
+    }, 0);
   }
 
-  // Proceed with updating the user record
+  // Update other user fields immediately
   const updatedUser = await db.user.update({
-      where: { id },
-      data: input
+    where: { id },
+    data: input,
   });
 
   return updatedUser;

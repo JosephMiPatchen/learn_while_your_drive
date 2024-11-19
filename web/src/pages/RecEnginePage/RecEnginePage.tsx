@@ -1,165 +1,61 @@
-import { useState, useEffect } from 'react';
-import { Metadata,useQuery} from '@redwoodjs/web';
-import { Card, Button, Spin, Typography, Space, Tooltip, Avatar, Modal, notification } from 'antd';
-import { CloseOutlined, SoundOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
-import { AudioPlayerModal } from './AudioPlayerModal';
-import { ProgressIndicator } from './ProgressIndicator';
-import { Link } from '@redwoodjs/router';
-const { Title, Text } = Typography;
-export const accentPink = "#ff4a91";
+// src/pages/RecEnginePage/RecEnginePage.tsx
 
-const GET_USER_QUERY = gql`
-  query GetUser($userId: String!) {
-    user(id: $userId) {
-      learningTree
-    }
-  }
-`;
+import { useState, useEffect, useRef } from 'react';
+import { Metadata, useQuery } from '@redwoodjs/web';
+import { notification, Typography } from 'antd';
+import { useParams } from '@redwoodjs/router';
+import RecEngineView from './RecEngineView';
 
-export const GET_MEDIA_RECOMMENDATIONS_QUERY = gql`
+const GET_MEDIA_RECOMMENDATIONS_QUERY = gql`
   query GetMediaRecommendations($userId: String!) {
     getMediaRecs(userId: $userId)
   }
 `;
 
-function hexToRgba(hex: string, opacity: number): string {
-  const bigint = parseInt(hex.replace("#", ""), 16);
-  const r = (bigint >> 16) & 255;
-  const g = (bigint >> 8) & 255;
-  const b = bigint & 255;
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-}
+const GET_USER_LATEST_JOBID_QUERY = gql`
+  query GetUserLatestJobId($userId: String!) {
+    user(id: $userId) {
+      latestJobId
+    }
+  }
+`;
 
-function createGradientBackground(baseColor: string, circleOpacity: number): string {
-  return `
-    radial-gradient(circle at 20% 45%, ${hexToRgba(baseColor, circleOpacity)}, transparent 25%),
-    radial-gradient(circle at 60% 50%, ${hexToRgba(baseColor, circleOpacity * 0.8)}, transparent 25%),
-    radial-gradient(circle at 50% 70%, ${hexToRgba(baseColor, circleOpacity)}, transparent 25%),
-    radial-gradient(circle at 70% 80%, ${hexToRgba(baseColor, circleOpacity)}, transparent 25%),
-    linear-gradient(to bottom, #ffffff, ${hexToRgba(baseColor, circleOpacity * 0.2)})
-  `;
-}
-
-// TitleBar, PageHeader, and LearningTrackCard components remain the sameconst TitleBar: React.FC = () => (
-const TitleBar: React.FC = () => (
-<div style={{
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: '60px',
-    background: '#ffffff',
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '0 20px',
-    zIndex: 1000,
-  }}>
-    <Title level={3} style={{ margin: 0, color: '#333' }}>Drive & Learn</Title>
-    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-      <Tooltip title="Settings">
-        <Button type="text" icon={<SettingOutlined style={{ fontSize: '20px', color: '#4a90e2' }} />} />
-      </Tooltip>
-      <Tooltip title="Profile">
-        <Avatar size="large" icon={<UserOutlined />} style={{ backgroundColor: accentPink, cursor: 'pointer' }} />
-      </Tooltip>
-    </div>
-  </div>
-);
-
-// PageHeader Component
-type PageHeaderProps = {
-  title: string;
-};
-const PageHeader: React.FC<PageHeaderProps> = ({ title }) => (
-  <div style={{
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    width: '100%',
-    maxWidth: '600px',
-    paddingTop: '10px',
-    paddingBottom: '10px',
-    borderBottom: '1px solid #f0f0f0',
-    background: 'white'
-  }}>
-    <Title level={2} style={{ color: '#333', margin: 0 }}>{title}</Title>
-    <Link to="/">
-      <Button
-        type="text"
-        icon={<CloseOutlined />}
-        style={{
-          color: '#333',
-          fontSize: '18px',
-          padding: 0,
-          marginLeft: 'auto',
-        }}
-      />
-    </Link>
-  </div>
-);
-
-// LearningTrackCard Component
-type LearningTrackCardProps = {
-  title: string;
-  description: string;
-  accentColor: string;
-  onListen: () => void;
-};
-
-const LearningTrackCard: React.FC<LearningTrackCardProps> = ({ title, description, accentColor, onListen }) => (
-  <Card
-  style={{
-    borderRadius: '12px', // More rounded corners for a smoother effect
-    background: 'rgba(255, 255, 255, 0.3)', // Higher transparency for frosted look
-    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)', // Softer shadow to create depth
-    border: '1px solid rgba(255, 255, 255, 0.18)', // Light border for frosty edges
-    backdropFilter: 'blur(12px)', // Strong blur for the frosted glass effect
-    WebkitBackdropFilter: 'blur(12px)', // Ensure compatibility with Safari
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-  }}
-  bordered={false}
->
-  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-    <div>
-      <Title level={5} style={{ margin: 0, color: '#333' }}>{title}</Title>
-      <Text style={{ fontSize: '12px', color: '#666', margin: 0 }}>{description}</Text>
-    </div>
-    <Tooltip title="Listen">
-      <Button
-        type="primary"
-        size="small"
-        shape="circle"
-        icon={<SoundOutlined style={{ color: 'white' }} />}
-        onClick={onListen}
-        style={{
-          background: accentPink,
-          borderColor: accentPink,
-        }}
-      />
-    </Tooltip>
-  </div>
-</Card>
-
-);
+const GET_JOB_STATUS_QUERY = gql`
+  query GetJobStatus($jobId: String!) {
+    jobStatus(id: $jobId) {
+      status
+      totalTopics
+      currentTopics
+    }
+  }
+`;
 
 const RecEnginePage: React.FC = () => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedAudio, setSelectedAudio] = useState<{ title: string; audioSrc: string } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [fetchMedia, setFetchMedia] = useState(false);
+  const { jobId: paramJobId } = useParams();
+  const [jobId, setJobId] = useState(paramJobId);
 
-  // Fetch user data
-  const { loading: userLoading, error: userError, data: userData } = useQuery(GET_USER_QUERY, {
-    variables: { userId: 'user1' }, // Replace 'user1' with dynamic user ID
+  // Ref to store the last known currentTopics value to detect increments
+  const lastCurrentTopicsRef = useRef<number | null>(null);
+
+  // Track current topics to control loading animation
+  const [currentTopics, setCurrentTopics] = useState(0);
+
+  // Fetch the latest job ID if not provided in params
+  const { data: userData, loading: userLoading } = useQuery(GET_USER_LATEST_JOBID_QUERY, {
+    variables: { userId: 'user1' },
+    skip: !!paramJobId,
+    onCompleted: (data) => setJobId(data.user.latestJobId),
   });
 
-  // Redwood useQuery to fetch media recommendations
-  const { loading, error, data } = useQuery(GET_MEDIA_RECOMMENDATIONS_QUERY, {
-    variables: { userId: 'user1' }, // Replace 'USER_ID' with dynamic user ID
+  // Fetch media recommendations only when fetchMedia is true
+  const { data: mediaData, refetch: refetchMediaRecommendations } = useQuery(GET_MEDIA_RECOMMENDATIONS_QUERY, {
+    variables: { userId: 'user1' },
+    skip: !fetchMedia,
     onCompleted: () => {
-      console.log(data)
       notification.success({
         message: 'Success',
         description: 'Media recommendations loaded successfully.',
@@ -173,26 +69,56 @@ const RecEnginePage: React.FC = () => {
         description: 'Failed to load media recommendations.',
         placement: 'top',
       });
-      console.error("Error fetching media recommendations:", error);
     },
   });
 
-  if (userLoading || loading) return <p>Loading...</p>;
-  if (userError || error) return <p>Error: {userError?.message || error?.message}</p>;
+  // Fetch job status to control loading overlay and media fetching
+  const { refetch: refetchJobStatus } = useQuery(GET_JOB_STATUS_QUERY, {
+    variables: { jobId },
+    skip: !jobId,
+    pollInterval: 2000,
+    onCompleted: (data) => {
+      const { currentTopics: newCurrentTopics, totalTopics } = data.jobStatus;
 
-  const user = userData.user;
+      setCurrentTopics(newCurrentTopics);
 
-  // Parse each JSON string from getMediaRecs into an object with title, summary, and content fields
-  const items = data?.getMediaRecs?.map((jsonString: string) => {
+      // Stop polling if currentTopics has reached totalTopics
+      if (newCurrentTopics >= totalTopics) {
+        refetchJobStatus({ pollInterval: null });
+      }
+
+      // Check if currentTopics has been incremented
+      if (lastCurrentTopicsRef.current !== null && newCurrentTopics > lastCurrentTopicsRef.current) {
+        refetchMediaRecommendations();  // Refetch media recommendations on increment
+      }
+
+      // Update the last known currentTopics value
+      lastCurrentTopicsRef.current = newCurrentTopics;
+
+      // Set loading to false if at least one topic is processed
+      if (newCurrentTopics >= 1) {
+        setLoading(false);
+        setFetchMedia(true);
+      }
+    },
+    onError: (error) => {
+      notification.error({
+        message: 'Error',
+        description: 'Failed to load job status.',
+        placement: 'top',
+      });
+    },
+  });
+
+  const items = (mediaData?.getMediaRecs || []).map((jsonString: string) => {
     try {
       return JSON.parse(jsonString);
     } catch (error) {
       console.error("Error parsing JSON string:", error);
       return null;
     }
-  }).filter(Boolean); // Filter out any null entries from failed parsing
+  }).filter(Boolean);
 
-  console.log(items)
   const handleListen = (item: { title: string; audioSrc: string }) => {
     setSelectedAudio(item);
     setModalVisible(true);
@@ -206,42 +132,50 @@ const RecEnginePage: React.FC = () => {
   return (
     <>
       <Metadata title="RecEngine" description="RecEngine page" />
-      <TitleBar />
-      <div style={{
-        padding: '80px 20px 20px',
-        minHeight: '100vh',
-        background: createGradientBackground("#ebc0ed", 0.5),
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        filter: isModalVisible ? 'blur(5px)' : 'none',
-      }}>
-        <PageHeader title={JSON.parse(user.learningTree).learningTrackName} onDelete={() => console.log("Delete Quantum Computer Learning Track")} />
-        <ProgressIndicator percent={68} color={accentPink} />
-        {loading ? (
-          <Spin size="large" style={{ marginTop: '20px' }} />
-        ) : (
-          <Space direction="vertical" size="large" style={{ width: '100%', maxWidth: '600px' }}>
-            {items.map((item, index) => (
-              <LearningTrackCard
-                key={index}
-                title={item.title}
-                description={item.summary}
-                accentColor={accentPink}
-                onListen={() => handleListen({ title: item.title, audioSrc: item.content })}
-              />
-            ))}
-          </Space>
-        )}
-      </div>
-      {selectedAudio && (
-        <AudioPlayerModal
-          visible={isModalVisible}
-          onClose={closeModal}
-          audioSrc={selectedAudio.audioSrc}
-          title={selectedAudio.title}
-        />
+
+      {/* Display loading animation if loading is true and currentTopics is 0 */}
+      {loading && currentTopics === 0 && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          backgroundColor: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(3px)', zIndex: 2000,
+          flexDirection: 'column',
+        }}>
+          <Typography.Title level={3} style={{ color: 'black', fontWeight: 'bold', marginBottom: '10px' }}>
+            Creating your learning plan...
+          </Typography.Title>
+          <div style={{ display: 'flex', gap: '6px', marginTop: '10px' }}>
+            <div className="dot" style={{ animationDelay: '0s' }} />
+            <div className="dot" style={{ animationDelay: '0.2s' }} />
+            <div className="dot" style={{ animationDelay: '0.4s' }} />
+          </div>
+        </div>
       )}
+
+      <RecEngineView
+        items={items}
+        loading={loading || userLoading}
+        isModalVisible={isModalVisible}
+        selectedAudio={selectedAudio}
+        onCloseModal={closeModal}
+        onListen={handleListen}
+      />
+
+      <style>
+        {`
+          .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #ff4a91;
+            animation: bounce 0.6s infinite alternate;
+          }
+          @keyframes bounce {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-10px); }
+          }
+        `}
+      </style>
     </>
   );
 };

@@ -28,9 +28,11 @@
     "@aws-sdk/client-bedrock": "^3.682.0",
     "@aws-sdk/client-bedrock-runtime": "^3.682.0",
     "@react-spring/web": "^9.7.5",
+    "@uiw/react-json-view": "^2.0.0-alpha.30",
     "antd": "^5.21.6",
     "aws-sdk": "^2.1691.0",
     "openai": "^4.70.2",
+    "react-json-view-lite": "^2.0.1",
     "react-transition-group": "^4.4.5"
   }
 }

@@ -9,15 +9,16 @@ generator client {
 }
 
 model User {
-  id                          String  @id @default(uuid())
-  email                       String  @unique
+  id                          String      @id @default(uuid())
+  email                       String      @unique
   name                        String?
   averageDriveDurationMinutes Int
   goal                        String?
-
-  ContentItem ContentItem[]
-  learningTree String?
+  ContentItem                 ContentItem[]
+  learningTree                String?
+  latestJobId                 String?
 }
+
 
 model ContentItem {
   id          String   @id @default(uuid())
@@ -34,4 +35,14 @@ model ContentItem {
   nextContentItemId String?      @unique
   nextContentItem   ContentItem? @relation("NextContentItem", fields: [nextContentItemId], references: [id])
   ContentItem       ContentItem? @relation("NextContentItem")
+}
+
+model JobStatus {
+  id        String   @id @default(uuid())
+  userId    String
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  totalTopics Int
+  currentTopics Int
 }

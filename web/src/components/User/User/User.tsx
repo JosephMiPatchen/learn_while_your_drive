@@ -3,6 +3,8 @@ import type {
   DeleteUserMutationVariables,
   FindUserById,
 } from 'types/graphql'
+import JsonView from '@uiw/react-json-view';
+
 
 import { Link, routes, navigate } from '@redwoodjs/router'
 import { useMutation } from '@redwoodjs/web'
@@ -142,12 +144,16 @@ const User = ({ user }: Props) => {
                       boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
                     }}
                   >
-                    <JsonViewer data={parsedLearningTree} />
+                    <JsonView value={parsedLearningTree} />
                   </div>
                 ) : (
                   <span>No learning tree data available</span>
                 )}
               </td>
+            </tr>
+            <tr>
+              <th>Latest Job Id</th>
+              <td>{user.latestJobId}</td>
             </tr>
           </tbody>
         </table>

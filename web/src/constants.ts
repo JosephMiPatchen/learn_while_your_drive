@@ -1,0 +1,1 @@
+export const ACCENT = "#ff4a91";

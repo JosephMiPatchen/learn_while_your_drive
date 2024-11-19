@@ -4,10 +4,10 @@ import type { ScenarioData } from '@redwoodjs/testing/api'
 export const standard = defineScenario<Prisma.UserCreateArgs>({
   user: {
     one: {
-      data: { email: 'String8165821', averageDriveDurationMinutes: 3209513 },
+      data: { email: 'String6968939', averageDriveDurationMinutes: 7915081 },
     },
     two: {
-      data: { email: 'String3866208', averageDriveDurationMinutes: 7520172 },
+      data: { email: 'String1233832', averageDriveDurationMinutes: 1047469 },
     },
   },
 })

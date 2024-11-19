@@ -23,7 +23,7 @@ def generate_directory_structure(input_dir, ignore_dirs):
 
 def combine_files(input_dir, output_file):
     # Hardcoded sets of directories and filenames to ignore
-    ignore_dirs = {'.git', '.redwood', '.vscode', 'dist', 'node_modules', '.yarn'}
+    ignore_dirs = {'.git', '.redwood', '.vscode', 'dist', 'node_modules', '.yarn','data'}
     ignore_files = {'README.md', 'LICENSE', 'dev.db', 'favicon.png', 'yarn.lock'}
 
     with open(output_file, 'w') as outfile:
@@ -46,7 +46,7 @@ def combine_files(input_dir, output_file):
                 file_path = os.path.join(root, file)
 
                 # Skip hidden files, .mp3 files, and files listed in ignore_files
-                if not file.startswith('.') and not file.endswith('.mp3') and os.path.basename(file) not in ignore_files and os.path.isfile(file_path):
+                if not file.startswith('.') and not file.endswith('.mp3') and not file.endswith('.sql') and os.path.basename(file) not in ignore_files and os.path.isfile(file_path):
                     try:
                         with open(file_path, 'r') as infile:
                             # Write filename as a header in the output file

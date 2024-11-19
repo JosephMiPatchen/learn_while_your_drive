@@ -125,6 +125,23 @@ const UserForm = (props: UserFormProps) => {
 
         <FieldError name="learningTree" className="rw-field-error" />
 
+        <Label
+          name="latestJobId"
+          className="rw-label"
+          errorClassName="rw-label rw-label-error"
+        >
+          Latest job id
+        </Label>
+
+        <TextField
+          name="latestJobId"
+          defaultValue={props.user?.latestJobId}
+          className="rw-input"
+          errorClassName="rw-input rw-input-error"
+        />
+
+        <FieldError name="latestJobId" className="rw-field-error" />
+
         <div className="rw-button-group">
           <Submit disabled={props.loading} className="rw-button rw-button-blue">
             Save
