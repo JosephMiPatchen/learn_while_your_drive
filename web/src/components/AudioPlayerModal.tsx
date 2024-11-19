@@ -53,7 +53,10 @@ const setCookie = (name: string, value: string, options: Record<string, any> = {
 // Component
 const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ visible, onClose, audioSrc, title }) => {
   const filename = audioSrc.split('/').pop() || 'audio';
-  const outputPath = `/${filename}`;
+  // Replace this line:
+  // const outputPath = `/${filename}`;
+  // With this:
+  const outputPath = audioSrc;
 
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const [duration, setDuration] = useState<number>(0);

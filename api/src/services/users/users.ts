@@ -71,21 +71,13 @@ here is the lesson
 async function createMediaLlmGeneratedLesson(node: LearningNode): Promise<LearningNode> {
   try {
     const lessonContent = await queryOpenAi(teachingPrompt + node.topic);
-    const lesson = await writeAudioFile(lessonContent);
-    const metaDataResponse = await queryOpenAi(metadataPrompt + lessonContent);
-
-    // Extract title and summary from metaDataResponse
-    const titleMatch = metaDataResponse.match(/Metadata: (.*?) &&/);
-    const summaryMatch = metaDataResponse.match(/&& (.*)/);
-
-    const title = titleMatch ? titleMatch[1] : "Untitled";
-    const summary = summaryMatch ? summaryMatch[1] : "No summary available.";
+    const { url: audioUrl, title, summary } = await writeAudioFile(lessonContent);
 
     // Create JSON object with lessonContent, title, and summary
     const mediaJson = {
       title,
-      summary,
-      content: lesson,
+      summary: summary, // You could generate a separate summary if desired
+      content: audioUrl,
       mediaType: "AudioFile"
     };
 
@@ -103,7 +95,7 @@ async function createMediaLlmGeneratedLesson(node: LearningNode): Promise<Learni
     }
   }
 
-  return Promise.resolve(node)
+  return Promise.resolve(node);
 }
 
 // Main updateUser mutation resolver

@@ -1,5 +1,12 @@
+<<<<<<< HEAD
 import fs from 'fs'
 import path from 'path'
+=======
+// api/src/lib/openAiClient.ts
+import OpenAI from 'openai'
+import { randomBytes } from 'crypto'
+import { uploadAudioToS3 } from './s3Client'
+>>>>>>> 84e0240 (feat: hosting mp3 on s3)
 
 import ffmpegStatic from 'ffmpeg-static'
 import ffmpeg from 'fluent-ffmpeg'
@@ -9,11 +16,21 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
-/**
- * Queries the OpenAI GPT-4 model with the given prompt.
- * @param {string} prompt - The prompt to send to OpenAI's GPT-4 model.
- * @returns {Promise<string>} The response text from OpenAI's GPT-4 model.
- */
+// Helper function to generate a random 7-character ID
+const generateRandomId = (): string => {
+  return randomBytes(4).toString('hex').slice(0, 7);
+}
+
+// Helper function to sanitize title for use in filename
+const sanitizeTitle = (title: string): string => {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-')         // Replace spaces with hyphens
+    .replace(/-+/g, '-')          // Remove consecutive hyphens
+    .trim();
+}
+
 export const queryOpenAi = async (prompt: string): Promise<string> => {
   try {
     const response = await openai.chat.completions.create({
@@ -45,21 +62,15 @@ export const queryOpenAi = async (prompt: string): Promise<string> => {
   }
 }
 
-// Sends `text` to OpenAI's text-to-speech API and writes the audio file to the filesystem. Returns
-// the path to the audio file.
-export const writeAudioFile = async (text: string): Promise<string> => {
-  const response = await openai.audio.speech.create({
-    model: 'tts-1-hd',
-    voice: 'echo',
-    input:
-      text ||
-      `
-      I drink brake fluid
-      They say I'm addicted, but
-      I can always stop
-      `,
-  })
+// Returns a Promise containing the signed URL and the title
+export const writeAudioFile = async (text: string): Promise<{url: string, title: string, summary: string}> => {
+  try {
+    // First, get metadata including title
+    const metaDataResponse = await queryOpenAi(
+      `For the below text, create a title and summary. The title should be 2-5 words, and the summary should be a single, attention-grabbing sentence. Please format your response in:
+      Metadata: <insert title> && <insert summary>
 
+<<<<<<< HEAD
   const buffer = Buffer.from(await response.arrayBuffer())
   const speechFilePath = path.resolve(`./web/public/vocals.mp3`)
   await fs.promises.writeFile(speechFilePath, buffer)
@@ -113,3 +124,42 @@ async function overlayAudioTracks(
       .run()
   })
 }
+=======
+      here is the lesson: ${text}`
+    );
+
+    // Extract title from metadata response
+    const titleMatch = metaDataResponse.match(/Metadata: (.*?) &&/);
+    const summaryMatch = metaDataResponse.match(/&& (.*)/);
+
+    const title = titleMatch ? titleMatch[1] : "Untitled";
+    const summary = summaryMatch ? summaryMatch[1] : "No summary available.";
+    const sanitizedTitle = sanitizeTitle(title);
+
+    // Generate random ID and combine with sanitized title
+    const randomId = generateRandomId();
+    const fileName = `${sanitizedTitle}-${randomId}.mp3`;
+
+    // Generate audio with OpenAI
+    const response = await openai.audio.speech.create({
+      model: 'tts-1-hd',
+      voice: 'echo',
+      input: text,
+    });
+
+    const buffer = Buffer.from(await response.arrayBuffer());
+
+    // Upload to S3 and get signed URL
+    const signedUrl = await uploadAudioToS3(buffer, fileName);
+
+    return {
+      url: signedUrl,
+      title: title,
+      summary: summary
+    };
+  } catch (error) {
+    console.error('Error generating audio:', error);
+    throw error;
+  }
+}
+>>>>>>> 84e0240 (feat: hosting mp3 on s3)
