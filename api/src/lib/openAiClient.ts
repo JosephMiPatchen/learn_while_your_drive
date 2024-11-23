@@ -1,16 +1,9 @@
-<<<<<<< HEAD
-import fs from 'fs'
-import path from 'path'
-=======
 // api/src/lib/openAiClient.ts
 import OpenAI from 'openai'
 import { randomBytes } from 'crypto'
-import { uploadAudioToS3 } from './s3Client'
->>>>>>> 84e0240 (feat: hosting mp3 on s3)
-
+import { uploadAudioToS3 } from './s3client'
 import ffmpegStatic from 'ffmpeg-static'
 import ffmpeg from 'fluent-ffmpeg'
-import OpenAI from 'openai'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -70,61 +63,6 @@ export const writeAudioFile = async (text: string): Promise<{url: string, title:
       `For the below text, create a title and summary. The title should be 2-5 words, and the summary should be a single, attention-grabbing sentence. Please format your response in:
       Metadata: <insert title> && <insert summary>
 
-<<<<<<< HEAD
-  const buffer = Buffer.from(await response.arrayBuffer())
-  const speechFilePath = path.resolve(`./web/public/vocals.mp3`)
-  await fs.promises.writeFile(speechFilePath, buffer)
-
-  const vocals = path.resolve(`./web/public/vocals.mp3`)
-  const background =
-    'https://incompetech.com/music/royalty-free/mp3-royaltyfree/Odyssey.mp3'
-  const combinedFilename = Date.now().toString() + '.mp3'
-  const output = path.resolve('./web/public/' + combinedFilename)
-  await overlayAudioTracks(vocals, background, output)
-
-  return combinedFilename
-}
-
-ffmpeg.setFfmpegPath(ffmpegStatic)
-
-async function overlayAudioTracks(
-  vocals: string,
-  background: string,
-  output: string
-) {
-  return new Promise<void>((resolve, reject) => {
-    ffmpeg()
-      .input(vocals)
-      .input(background)
-      .complexFilter([
-        {
-          filter: 'volume',
-          options: { volume: 0.01 },
-          inputs: '1:a',
-          outputs: 'lowered',
-        },
-        {
-          filter: 'amix',
-          options: {
-            inputs: 2,
-            duration: 'first',
-          },
-          inputs: ['0:a', 'lowered'],
-        },
-      ])
-      .output(output)
-      .on('end', () => {
-        console.log('Audio overlay complete')
-        resolve()
-      })
-      .on('error', (err) => {
-        console.error('Error:', err)
-        reject(err)
-      })
-      .run()
-  })
-}
-=======
       here is the lesson: ${text}`
     );
 
@@ -162,4 +100,42 @@ async function overlayAudioTracks(
     throw error;
   }
 }
->>>>>>> 84e0240 (feat: hosting mp3 on s3)
+
+// TODO integrate back intom writeAudioFile
+async function overlayAudioTracks(
+  vocals: string,
+  background: string,
+  output: string
+) {
+  return new Promise<void>((resolve, reject) => {
+    ffmpeg()
+      .input(vocals)
+      .input(background)
+      .complexFilter([
+        {
+          filter: 'volume',
+          options: { volume: 0.01 },
+          inputs: '1:a',
+          outputs: 'lowered',
+        },
+        {
+          filter: 'amix',
+          options: {
+            inputs: 2,
+            duration: 'first',
+          },
+          inputs: ['0:a', 'lowered'],
+        },
+      ])
+      .output(output)
+      .on('end', () => {
+        console.log('Audio overlay complete')
+        resolve()
+      })
+      .on('error', (err) => {
+        console.error('Error:', err)
+        reject(err)
+      })
+      .run()
+  })
+}
