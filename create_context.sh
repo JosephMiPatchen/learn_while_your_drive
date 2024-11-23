@@ -1,0 +1,1 @@
+python3 ./misc/llm_context_gen/gen_context.py . ./misc/llm_context_gen/data/redwood_app_2.txt
