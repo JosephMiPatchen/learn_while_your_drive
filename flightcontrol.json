@@ -36,7 +36,7 @@
                 "value": "dbConnectionString"
               }
             },
-            "S3_BUCKET_NAME": "dnl-media",
+            "S3_BUCKET_NAME": "sonosage-media",
             "OPENAI_MODEL": "gpt-4-turbo",
             "OPENAI_API_KEY": {
                 "fromParameterStore": "OPENAI_API_KEY"

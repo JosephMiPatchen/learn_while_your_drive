@@ -58,7 +58,7 @@ const HomePage: React.FC = () => {
       <Metadata title="Home" description="Home page" />
 
       <div style={{
-        padding: '20px 20px 80px',
+        padding: '10px 20px 80px',
         minHeight: '100vh',
         background: `linear-gradient(180deg,
           rgba(255, 74, 145, 0.08) 0%,
@@ -70,9 +70,20 @@ const HomePage: React.FC = () => {
         {/* Header Section */}
         <div style={{
   textAlign: 'center',
-  paddingTop: '50px',
+  paddingTop: '0px',
   paddingBottom: '24px',
 }}>
+  <Title level={1} style={{
+  fontSize: '48px',
+  marginBottom: '24px',
+  background: `linear-gradient(135deg, ${ACCENT}, #FF8C69)`,
+  WebkitBackgroundClip: 'text',
+  WebkitTextFillColor: 'transparent',
+  fontWeight: 'bold',
+  letterSpacing: '-0.5px'
+}}>
+  Sonosage
+</Title>
           <TriangleLogo style={{
             marginBottom: '20px'
           }}/>
