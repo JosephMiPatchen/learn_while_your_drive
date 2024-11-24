@@ -3,7 +3,6 @@ import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 const s3Client = new S3Client({
-  region: 'us-west-2',  // Updated to match your bucket's region
   endpoint: 'https://s3.us-west-2.amazonaws.com', // Explicitly set the endpoint
   forcePathStyle: false // Use virtual hosted-style URLs
 });
