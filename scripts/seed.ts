@@ -1,38 +1,49 @@
-// import { db } from 'api/src/lib/db'
-
-// Manually apply seeds via the `yarn rw prisma db seed` command.
-//
-// Seeds automatically run the first time you run the `yarn rw prisma migrate dev`
-// command and every time you run the `yarn rw prisma migrate reset` command.
-//
-// See https://redwoodjs.com/docs/database-seeds for more info
-
 import { db } from 'api/src/lib/db'
 
 export default async () => {
   try {
-    // Seed Users
-    await db.user.createMany({
-      data: [
-        {
-          id: 'user1',
-          email: 'alice@example.com',
-          name: 'Alice',
-          goal: 'Complete Redwood tutorial',
-          averageDriveDurationMinutes: 15,
+    console.info('🌱 Starting database seeding...')
+
+    // Check for existing users to avoid duplication
+    const existingUsers = await db.user.findMany({
+      where: {
+        id: {
+          in: ['user1', 'user2'], // IDs to check for existing users
         },
-        {
-          id: 'user2',
-          email: 'bob@example.com',
-          name: 'Bob',
-          goal: 'Start a blog',
-          averageDriveDurationMinutes: 25,
-        },
-      ],
+      },
     })
 
-    console.info('\n🌱 Database has been seeded successfully!\n')
+    // Determine which users need to be added
+    const existingUserIds = new Set(existingUsers.map((user) => user.id))
+    const usersToCreate = [
+      {
+        id: 'user1',
+        email: 'alice@example.com',
+        name: 'Alice',
+        goal: 'Complete Redwood tutorial',
+        averageDriveDurationMinutes: 15,
+      },
+      {
+        id: 'user2',
+        email: 'bob@example.com',
+        name: 'Bob',
+        goal: 'Start a blog',
+        averageDriveDurationMinutes: 25,
+      },
+    ].filter((user) => !existingUserIds.has(user.id))
+
+    // Insert new users only if they don't already exist
+    if (usersToCreate.length > 0) {
+      await db.user.createMany({
+        data: usersToCreate,
+      })
+      console.info(`✅ Added ${usersToCreate.length} new users to the database.`)
+    } else {
+      console.info('✅ No new users to add.')
+    }
+
+    console.info('🌱 Database seeding completed successfully!\n')
   } catch (error) {
-    console.error(error)
+    console.error('❌ Seeding error:', error)
   }
 }
