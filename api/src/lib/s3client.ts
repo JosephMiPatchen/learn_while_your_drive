@@ -3,8 +3,9 @@ import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 const s3Client = new S3Client({
-  endpoint: 'https://s3.us-west-2.amazonaws.com', // Explicitly set the endpoint
-  forcePathStyle: false // Use virtual hosted-style URLs
+  endpoint: `https://s3.${process.env.AWS_REGION}.amazonaws.com`,
+  forcePathStyle: false, // Use virtual hosted-style URLs
+  region: process.env.AWS_REGION
 });
 
 const BUCKET_NAME = process.env.S3_BUCKET_NAME || 'dnl-media';
